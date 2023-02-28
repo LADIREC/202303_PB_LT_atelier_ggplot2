@@ -1,0 +1,476 @@
+#' ---
+#' title: "Visualiser les données avec ggplot2"
+#' author: "Pascal Brissette"
+#' format: pdf
+#' editor: visual
+#' ---
+#' 
+## -------------------------------------------------------------------------------
+options(repos=c(CRAN="https://mirror.csclub.uwaterloo.ca/CRAN/"))
+if(!"ggplot2" %in% rownames(installed.packages())) {install.packages("ggplot2")}
+if(!"gugenbergr" %in% rownames(installed.packages())) {install.packages("gutenbergr")}
+if(!"stringr" %in% rownames(installed.packages())) {install.packages("stringr")}
+
+library(ggplot2)
+library(gutenbergr)
+library(stringr)
+
+#' 
+#' Les graphiques sont l'un des plus puissants leviers d'explication des données. Il n'y a guère de meilleur moyen de parler des données et de les faire "parler" que de les donner à voir. L'utilisation des graphiques ne date pas d'hier. On peut admirer ci-dessous celui produit en 1869 par l'ingénieur Charles Joseph Mignard. Celui-ci illustre les pertes colossales subies par la Grande Armée (450 000 hommes) de Napoléon au cours de la Campagne de Russie. L'épaisseur du trait indique la quantité d'hommes, la couleur, la direction de la marche. Bien que fondé sur de solides statistiques, ce graphique donne à voir un phénomène qui ne requiert aucune connaissance des statistiques. En quelques traits, il synthétise toute une histoire.
+#' 
+#' [![Charles Joseph Minard, "Carte figurative des pertes successives en hommes de l\'armée française dans la campagne de Russie 1812-1813", 1869](images/minard_campagne_russie.png){fig-align="center"}](https://fr.wikipedia.org/wiki/Charles_Joseph_Minard)
+#' 
+#' ## Programme de l'atelier
+#' 
+#' Dans le présent atelier, vous aurez l'occasion de vous initier à la grammaire des graphiques et à l'extension `ggplot2`, ainsi qu'aux graphiques à barres et de dispersion. Avant d'en venir aux graphiques, il faut cependant introduire un type de données, dites "catégorielles", fréquemment utilisées dans la création des graphiques.
+#' 
+#' ## Les facteurs
+#' 
+#' Pour expliquer ce qu'est un facteur ou une donnée catégorielle, rien de mieux que d'utiliser un exemple simple. Soit le tableau de données suivant, indiquant de manière aléatoire les profits mensuel de vente de vêtements d'occasion.
+#' 
+## -------------------------------------------------------------------------------
+
+calendrier_profit_df <- data.frame(mois = sample(month.name, size = 50, replace = T),
+                            profit = round(sample(1:500, size = 50, replace = T)))
+
+head(calendrier_profit_df)
+
+
+#' 
+#' Le tableau comporte 50 lignes, mais même s'il en avait 5000, il n'y aurait jamais d'autre modalité dans la première colonne que ceux du calendrier grégorien. À moins que la personne ayant entré les données ait fait des erreurs dans l'orthographe des noms de mois, bien sûr, mais on y reviendra plus ci-dessous. Le fait est que si le vendeur a bien fait son travail, le nombre maximal de modalités dans la première colonne est de 12. On peut en observer la distribution comme suit:
+#' 
+## -------------------------------------------------------------------------------
+
+table(calendrier_profit_df$mois)
+
+
+#' 
+#' Le vecteur de type `character`, quand il comporte un nombre **fini** et **limité** de modalités, gagne souvent à être converti en objet **`factor`**. Les objets `factors` ne sont pas stockés en mémoire comme des chaînes de caractères, mais comme des nombres correspondant aux niveaux distincts. Cela réduit donc de manière importante la taille du vecteur en mémoire et améliore les performances des analyses statistiques. De plus, les modalités distinctes d'un objet factor peuvent être ordonnés, ce qui est très utile lorsque, dans un graphique, on souhaite présenter les données d'une manière très précise.
+#' 
+#' Prenons à nouveau l'exemple des mois du calendrier. Si je demande à R d'ordonner les douze mois du calendrier, il ne comprendra pas ce que je veux: il prendra les chaînes de caractères que je lui donne et ordonnera la série par ordre alphabétique, en prenant la première lettre du mois comme point de comparaison. Voyons ce que cela donne:
+#' 
+## -------------------------------------------------------------------------------
+
+mois_c <- c("février", "janvier", "novembre","mars", "octobre", "avril", "mai", "juin",
+            "juillet", "août","septembre","août", "mars", "février", "décembre", "juin")
+
+sort(mois_c)
+
+
+#' 
+#' Lorsque je demande à ordonner ce vecteur, R place les mois d'août et d'avril en tête de vecteur, suivis par décembre. C'est ici que la fonction `factor()`, qui transforme une donnée en donnée catégorielle, peut être utile. Avec l'argument `levels =`, nous pourrons imposer un ordre. Et comme les mois sont en nombre finis, on ne risque pas de croiser dans nos données des modalités autres que les douze que nous allons définir.
+#' 
+## -------------------------------------------------------------------------------
+
+# On peut créer un vecteur qui indiquera à la fonction `factor()` quel ordre je souhaite donner à mes données catégoriques (argument `levels=`)
+ordre_mois <- c("janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août",
+                  "septembre", "octobre", "novembre", "décembre")
+
+# On transforme ainsi le vecteur mois_c, de type `character`, en vecteur catégorique (facteur)
+mois_f <- factor(x = mois_c,
+       levels = ordre_mois)
+
+# On peut vérifier le type de l'objet
+class(mois_f)
+
+# On peut trier les valeurs selon l'ordre fourni à l'argument `levels=`
+sort(mois_f)
+
+# Ou selon l'ordre inversé
+sort(mois_f, decreasing = TRUE)
+
+
+#' 
+#' Un autre intérêt des facteurs est qu'ils peuvent aider à repérer d'eventuelles erreurs typographiques dans les modalités. Supposons qu'il y ait une telle erreur dans mon vecteur initial. Je vais ordonner ce vecteur de charactères selon un ordre défini dans l'argument `levels=` de la fonction `factor()`, comme je l'ai fait ci-dessus. Voyez le résultat lorsque j'appelle le vecteur catégorique:
+#' 
+## -------------------------------------------------------------------------------
+
+# Création d'un vecteur comprenant 16 éléments (répétition de certains noms de mois, dont l'un mal orthographié)
+mois_c <- c("février", "janvier", "movembre","mars", "octobre", "avril", "mai", "juin",
+            "juillet", "août","septembre","août", "mars", "février", "décembre", "juin")
+
+# Le vecteur de caractères est transformé en facteur. L'ordre des mois est précisé avec levels=
+mois_f <- factor(x = mois_c,levels = c("janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août","septembre", "octobre", "novembre", "décembre"))
+
+mois_f
+
+
+#' 
+#' Le mois qui a été mal orthographié dans le vecteur des valeurs ne correspond pas à l'une des catégories indiquées dans l'argument `levels=`. L'appel du vecteur catégorique renvoit donc `<NA>` à sa position.
+#' 
+#' Si vous demandez à R de vous fournir la structure du vecteur catégorique, vous verrez une série de chiffres qui pourrait attirer votre attention:
+#' 
+## -------------------------------------------------------------------------------
+
+str(mois_f)
+
+
+#' 
+#' La fonction `str()` confirme d'abord que le vecteur est de type catégorique (`factor`) et qu'il comporte 12 catégories (`levels`). Les deux premiers niveaux vous sont indiqués ("janvier", "février"), puis suit un vecteur numérique. À quoi cela correspond-il?
+#' 
+#' C'est une particularité de la variable catégorique de se présenter sous la forme de caractères, mais d'être emmagasinée dans R comme une suite de nombres entiers. La variable catégorique est une variable discrète et comme il n'y a pas d'intervalle entre les catégories, R peut associer à chacune, selon l'ordre que l'on a indiqué dans `levels=`, un nombre entier positif. De sorte que si on demande à R à quoi correspondent les données de notre vecteur avec `typeof()`, il nous dira qu'il s'agit d'*integer*:
+#' 
+## -------------------------------------------------------------------------------
+
+class(mois_f) # la structure est de type factor
+typeof(mois_f) # les données elles-mêmes sont de type numérique (integer)
+
+
+#' 
+#' ## La grammaire des graphiques (GG)
+#' 
+#' L'extension de base `graphics`, activée dès que l'on ouvre RStudio, permet de créer rapidement des graphiques avec la fonction `plot()`. Les utilisateurs de R utilisent plutôt `ggplot2`, qui permet de créer des graphiques de plus grande qualité et de mieux contrôler les paramètres de chaque élément. Cette extension implémente dans R la grammaire des graphiques proposée par [Wilkinson en 2005](https://link.springer.com/book/10.1007/0-387-28695-0).
+#' 
+#' Les graphiques sont composés de plusieurs éléments: des mesures, des formes, des titres, des ensembles de couleurs, des coordonnées, des axes et, bien entendu, des données. Il s'agit donc d'objets complexes que la grammaire des graphiques permet de décomposer et de régler séparément. Outre l'ouvrage de Wilkinson, vous lirez avec profit l'article de Hadley Wickham, auteur des extensions ggplot et [ggplot2](https://cran.r-project.org/web/packages/ggplot2/index.html), ainsi que son ouvrage, [*ggplot2: Elegant Graphics for Data Analysis*](https://ggplot2-book.org/mastery.html).
+#' 
+#' Dans la grammaire des graphiques, une couche est composée des éléments suivants:
+#' 
+#' 1.  Des **données**;
+#' 2.  Des composantes **esthétiques**;
+#' 3.  Une opération **statistique**;
+#' 4.  Un **objet géométrique** (points, lignes, rectanges, cercles, carte, etc.);
+#' 5.  Des **ajustements** pour permettre, par exemple, la superposition de points sans nuire à la lisibilité du graphique.
+#' 
+#' Le graphique est le résultat de la superposition de ces couches. Certaines sont facultatives ou sont pourvues de valeurs par défaut, d'autres sont nécessaires et doivent être précisées par l'utilisateur:
+#' 
+#' [![Capture de l\'antisèche ggplot2, RStudio](images/ggplot_min.jpg){fig-align="center"}](https://www.rstudio.com/resources/cheatsheets/)
+#' 
+#' +---------------------------+-------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+#' | Élément                   | Fonction                                  | Explications                                                                                                                                                                                                                                                                                        |
+#' +===========================+===========================================+=====================================================================================================================================================================================================================================================================================================+
+#' | **Données**               | `ggplot()`                                | Fonction d'initialisation du graphique. On y insère généralement le **tableau de données** dont les variables serviront à définir les éléments esthétiques. Ces éléments esthétiques, `aes()`, peuvent être insérés dans cette fonction s'ils sont identiques pour toutes les couches du graphique. |
+#' +---------------------------+-------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+#' | **Éléments esthétiques**  | `aes()`                                   | Éléments esthétiques, précisés comme argument `mapping=` de la fonction d'initialisation s'ils sont identitques pour toutes les couches du graphique, ou à l'intérieur des fonctions commençant par `geom_` s'ils sont différents.                                                                  |
+#' |                           |                                           |                                                                                                                                                                                                                                                                                                     |
+#' |                           |                                           | Parmi les éléments esthétiques, on trouve:                                                                                                                                                                                                                                                          |
+#' |                           |                                           |                                                                                                                                                                                                                                                                                                     |
+#' |                           |                                           | -   `x` et `y` ==\> variables qui définissent respectivement les axes x et y du graphique;                                                                                                                                                                                                          |
+#' |                           |                                           |                                                                                                                                                                                                                                                                                                     |
+#' |                           |                                           | -   `fill` ==\> variable qui définit la couleur de remplissage des formes géométriques;                                                                                                                                                                                                             |
+#' |                           |                                           |                                                                                                                                                                                                                                                                                                     |
+#' |                           |                                           | -   `colour` ==\> variable qui définit la couleur des contours des formes géométriques;                                                                                                                                                                                                             |
+#' |                           |                                           |                                                                                                                                                                                                                                                                                                     |
+#' |                           |                                           | -   `size` ==\> variable qui définit la taille des points ou des lignes;                                                                                                                                                                                                                            |
+#' |                           |                                           |                                                                                                                                                                                                                                                                                                     |
+#' |                           |                                           | -   `alpha` ==\> le degré de transparence des formes géométriques (entre 0 et 1);                                                                                                                                                                                                                   |
+#' |                           |                                           |                                                                                                                                                                                                                                                                                                     |
+#' |                           |                                           | -   `shape` ==\> variable qui définit des formes géométriques en complément des points, dans un graphique à points.                                                                                                                                                                                 |
+#' +---------------------------+-------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+#' | **Éléments géométriques** | `geom_point()`                            | diagramme de dispersion (à points)                                                                                                                                                                                                                                                                  |
+#' +---------------------------+-------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+#' |                           | `geom_bar()`                              | diagramme à barres. Prend une variable catégorique en x. Par défaut, compte le nombre de valeurs par catégorie (x).                                                                                                                                                                                 |
+#' +---------------------------+-------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+#' |                           | `geom_col()`                              | diagramme à barres. Prend une variable catégorique en x et une variable numérique en y. Équivalent de geom_bar(stat="identity") avec définition d'une variable continue y.                                                                                                                          |
+#' +---------------------------+-------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+#' |                           | `geom_histogram()`                        | diagramme à barres. Prend des variables continues en x et en y. Par défaut, bins=30.                                                                                                                                                                                                                |
+#' +---------------------------+-------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+#' | **Facettes**              | `facet_wrap()` ou `facet_grid()`          | distribue les modalités d'une variable catégorique en plusieurs graphiques de formats réduits.                                                                                                                                                                                                      |
+#' +---------------------------+-------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+#' | **Statistiques**          | `stat_identity()`, `stat_summary()`, etc. | Précise les opérations statistiques faites sur les données avant de les afficher dans le graphique.                                                                                                                                                                                                 |
+#' +---------------------------+-------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+#' | **Coordonnées**           | `coord_cartesian()`                       | Permet de fixer des limites aux axes x et y, ce qui a pour effet d'aggrandir une portions du graqphique.                                                                                                                                                                                            |
+#' +---------------------------+-------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+#' |                           | `coord_map()`                             | Projette une portion de la géographie terrestre sur une carte en 2 dimensions.                                                                                                                                                                                                                      |
+#' +---------------------------+-------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+#' | **Thèmes**                | `theme_grey()`, `theme_light()`, etc.     | Série de fonctions permettant de préciser les éléments esthétiques du graphique qui ne concernent pas les données (couleur et opacité du fond, police de caractères, etc.)                                                                                                                          |
+#' +---------------------------+-------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+#' 
+#' Les quelques éléments indiqués dans le tableau ci-dessus donnent une faible idée de la richesse de l'extension `ggplot2`, dont le développement est assuré par une équipe de programmeurs. À peu près toutes les composantes d'un graphique peuvent être contrôlés, pour peu qu'on ait la patience de lire la documentation, abondante, ou de chercher de l'aide en ligne (ex: [Stack Overflow](https://stackoverflow.com/)).
+#' 
+#' On notera également que plusieurs extensions prennent appui sur `ggplot2` pour projeter l'art du graphique à un tout autre niveau. Par exemple, l'extension [`plotly`](https://cran.r-project.org/web/packages/plotly/index.html) permet d'interagir avec le graphique à l'aide d'un menu directement accessible avec la souris. D'autres extensions améliorent le rendu de graphiques spéciaux (cartes thermiques, cartes géographiques, réseaux, etc.).
+#' 
+#' ## Le diagramme à barres
+#' 
+#' Revenons aux bases et voyons comment se combinent concrètement les éléments d'un graphique. Nous allons utiliser un jeu de données construit à partir du roman *Maria Chapdelaine*, de Louis Hémon, un roman français devenu un classique de la littérature québécoise (!). Dans le bloc d'instructions ci-dessous, que vous pouvez simplement ignorer (le prétraitement de données textuelles n'est pas le sujet de l'atelier), le texte de Louis Hémon est importé depuis le [Projet Gutenberg](https://www.gutenberg.org/), puis traité pour forger une table comprenant, pour chacun des chapitres, le nombre de mots.
+#' 
+## -------------------------------------------------------------------------------
+# Importation sous forme de tableau de données du texte de Maria Chapdelaine avec son identifiant unique
+maria <- gutenberg_download(13525, mirror = "http://mirror.csclub.uwaterloo.ca/gutenberg/")
+
+# Transformation de l'encodage des chaînes de caractères du vecteur text
+maria$text <- iconv(maria$text, from = "latin1", "utf8")
+
+# Élimination des lignes blanches
+maria <- maria[maria$text != "", ]
+
+# Élimination du péritexte
+maria <- maria[grep("CHAPITRE I\\b", maria$text) : nrow(maria), ]
+
+# Repérage de la ligne correspondant à chaque début de chapitre
+debut_chapitres_v <- which(grepl("CHAPITRE", maria$text))
+
+# Utilisation du vecteur précédent pour indiquer la ligne correspondant à la fin de chaque chapitre
+fin_chapitres_v <- append((debut_chapitres_v[-1]-1), length(maria$text))
+
+# Création d'une petite fonction permettant la séparation des mots d'une chaîne de caractères (tokénisation)
+tokenisation_fun <- function(texte, debut_chapitre, fin_chapitre){
+  texte_v <- texte[as.integer(debut_chapitre) : as.integer(fin_chapitre)]
+  mots_l <- strsplit(texte_v, "\\W")          # séparation de tous les mots
+  mots_v <- unlist(mots_l)                    # transformation de l'objet liste en vecteur
+  mots_v <- tolower(mots_v)                   # Bas de casse
+  mots_pleins_v <- which(mots_v != "")        # Identificatioon des éléments vides
+  mots_v <- mots_v[mots_pleins_v]             # Élimination des éléments vides
+  mots_v <- mots_v[-c(1:2)]                   # Élimination des noms de chapitre
+  return(mots_v)                              # Renvoi explicite de l'objet vecteur
+}
+
+# Création d'une liste vide dans laquelle on emmagasinera les mots de chacun des chapitres
+mots_chapitres <- vector(mode = "list", length = length(debut_chapitres_v))
+
+# On remplit notre objet liste avec les mots de chacun des chapitre (à l'aide d'une structure de contrôle appelée "boucle for")
+for(i in seq_along(debut_chapitres_v)){
+  mots_chapitres[[i]] <- tokenisation_fun(texte = maria$text,
+                                          debut_chapitre = (debut_chapitres_v[i]),
+                                          fin_chapitre = fin_chapitres_v[i])
+}
+
+# On crée un nouveau tableau de données comprenant une colonne pour les numéros de chapitres: 
+mots_chapitres_df <- data.frame(chapitre = c("I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII", "XIV", "XV", "XVI"))
+
+# ... une colonne où seront rassemblés tous les mots sous forme de liste:
+mots_chapitres_df$mots <- sapply(mots_chapitres, "[")
+
+# Et une colonne indiquant le nombre de mots: de chaque chapitre
+mots_chapitres_df$longueur_chap <- sapply(mots_chapitres, length)
+
+# Création d'une colonne avec tous les mots de chaque chapitre distinct joints en une seule chaine de caractères
+mots_chapitres_df$texte <- sapply(mots_chapitres_df$mots, paste, collapse = " ")
+
+
+# On crée trois colonnes, une pour chacun des prénoms des prétendants de Maria. La valeur correspond au nombre d'occurrences de chaque prénom dans chaque chapitre. La fonction utilisée, `str_count()`, est prise à l'extension stringr.
+
+mots_chapitres_df$francois <- str_count(mots_chapitres_df$texte, pattern = "fran[cç]ois")
+
+mots_chapitres_df$lorenzo <- str_count(mots_chapitres_df$texte, pattern = "lorenzo")
+
+mots_chapitres_df$eutrope <- str_count(mots_chapitres_df$texte, pattern = "eutrope")
+
+
+#' 
+## -------------------------------------------------------------------------------
+
+# On peut visualiser le tableau
+# head(mots_chapitres_df, 2)
+
+# Ainsi que le nombre total d'occurrences pour chacun des noms dans tout le roman
+colSums(mots_chapitres_df[, c(5:7)])
+
+
+
+#' 
+#' Nous allons créer un nouveau tableau de données pour ces données agrégées, et les projeter dans un premier graphique à barres.
+#' 
+## -------------------------------------------------------------------------------
+
+# Création du nouveau tableau
+pretendants_total <- data.frame(pretendant = names(colSums(mots_chapitres_df[, c(5:7)])),
+                                freq_brute = unclass(colSums(mots_chapitres_df[, c(5:7)])),
+                                row.names = NULL)
+
+# On crée une première couche contenant les données et leur projection en composantes esthétiques.
+p <- ggplot(pretendants_total, aes(x=pretendant, y=freq_brute))
+
+# On ajoute à cette première couche (avec l'opérateur + ) les formes géométriques. 
+p2 <- p + geom_bar(stat = "identity")
+
+p2
+
+
+#' 
+#' Modifions les titres d'axes et ajoutons un titre général au diagramme:
+#' 
+## -------------------------------------------------------------------------------
+
+p3 <- p2 +
+  ggtitle("Les prétendants de Maria Chapdelaine",
+          subtitle = "Fréquence brute des prénoms")+ 
+  xlab("Prénom du prétendant") +
+  ylab("Fréquence brute")
+
+p3
+
+#' 
+#' On notera l'utilisation de l'opérateur `+` pour l'ajout des éléments aux couches.
+#' 
+#' La hauteur de chaque colonne est déterminée par la fréquence (valeur numérique) associée à chaque prénom. On peut indiquer ces valeurs directement sur les colonnes respectives. Profitons-en pour alléger modifier le thème en utilisant l'une des fonctions commençant par `theme_` :
+#' 
+## -------------------------------------------------------------------------------
+
+p3 + 
+  geom_text(aes(label=freq_brute), vjust=1.6, color="white") +
+  theme_classic()
+
+
+#' 
+#' Le diagramme à barres est très efficace pour représenter des jeux de données où les modalités des variables discrètes sont en nombre relativement limité. Lorsque ces modalités sont très nombreuses, le graphique peut devenir confus.
+#' 
+#' Voyons cela avec les valeurs non agrégées du premier tableau de données, `mots_chapitres_df`. Comme cela arrive fréquemment, il faut modifier la structure du tableau pour que toutes les valeurs numériques associées au fréquences soient contenues dans une seule colonne. On empile pour ainsi dire les valeurs numériques en prenant soin qu'une autre colonne indique le prenom du pretendant et le numero du chapitre auxquels les valeurs sont associées. La fonction `reshape()` de base R permet de faire ce type d'opération, mais il existe des extensions spécialisées qui simplifient le processus (tidyr et data.table, notamment).
+#' 
+## -------------------------------------------------------------------------------
+
+pretendants_empiles_df <- reshape(
+  data =mots_chapitres_df[, c("chapitre", "francois", "lorenzo", "eutrope")],
+  idvar = "chapitre",
+  varying = list(c("francois", "lorenzo", "eutrope")),
+  v.names = "frequence",
+  times = c("francois", "lorenzo", "eutrope"),
+  timevar = "prenom",
+  direction = "long"
+  )
+
+tail(pretendants_empiles_df)
+
+
+#' 
+## -------------------------------------------------------------------------------
+
+# On fait des numéros romains de chapitre des données catégorielles
+pretendants_empiles_df$chapitre <- factor(pretendants_empiles_df$chapitre, levels = c("I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII", "XIV", "XV", "XVI"))
+
+head(pretendants_empiles_df)
+
+
+#' 
+#' Nous avons maintenant trois séries d'information à transposer dans un graphique: le **prénom** de chacun des prétendants de Maria, la **fréquence** où ce prénom apparait dans chacun des **chapitres**. On ne peut désolidariser ces séries d'éléments et il faut trouver le moyen de les projeter dans un graphique à deux dimensions.
+#' 
+#' Pour transposer ces trois variables dans un graphique, on peut soit utiliser un élément esthétique supplémentaire (une couleur pour le remplissage des formes, par exemple) ou décliner en plusieurs facettes les observations du tableau en fonction de l'une des variables catégorielles. Dans le premier cas, toutes les observations du tableau seront insérées dans le même graphique; dans le deuxième cas, les observations seront distribuées en autant de petits graphiques que la variable catégorielle possède de modalités. Nous allons voir ces deux options.
+#' 
+## -------------------------------------------------------------------------------
+
+# La première couche constituée des données et des éléments esthétiques sera la même pour les deux types de diagrammes
+p <- ggplot(pretendants_empiles_df, aes(x=chapitre, y=frequence, fill=prenom))
+
+# Option 1: le diagramme utilise les couleurs pour indiquer la distribution des valeurs selon la variable `nom`.
+p + geom_bar(stat = "identity", position = "stack")+
+  xlab("Chapitre")+
+  ylab("Fréquence")
+
+
+
+#' 
+## -------------------------------------------------------------------------------
+
+# Option 2: le diagramme distribue les données dans trois facettes
+p + geom_bar(stat = "identity") +
+  facet_wrap(~ prenom) +
+  theme(axis.text=element_text(size=6),     #On diminue la taille des titres d'axes pour éviter
+        axis.title=element_text(size=12))+  #les chevauchements
+  xlab("Chapitre")+
+  ylab("Fréquence")
+
+
+#' 
+#' À défaut d'être parfaitement lisibles, ces deux premiers graphiques montrent qu'aucune valeur n'est associée aux chapitres IV, VII et VIII. Nous pouvons donc éliminer toutes les lignes associées à ces chapitres dans le tableau:
+#' 
+## -------------------------------------------------------------------------------
+
+# Élimination des lignes associées à des valeurs nulles
+pretendants_empiles_df <- pretendants_empiles_df[!pretendants_empiles_df$frequence == 0, ]
+
+head(pretendants_empiles_df)
+
+
+#' 
+#' ## Le diagramme de dispersion
+#' 
+#' Le diagramme de dispersion, ou nuage de points, transpose chaque donnée d'une distribution en un point. Il est souvent utilisé pour vérifier la corrélation, positive ou négative, entre deux variables (généralement continues) projetées sur l'axe des `x` et des `y`. Prenons le jeu de données `diamonds` proposé par l'extension `ggplot2`. Celui-ci contient une multitude d'informations sur 53 940 diamants. Si on voulait vérifier avec un diagramme de dispersion la corrélation entre les variables `carats` et `price`, deux variables continues, on donnerait à R les instructions suivantes:
+#' 
+## -------------------------------------------------------------------------------
+
+ggplot(diamonds, aes(x=carat, y=price))+
+  geom_point()
+
+
+#' 
+#' Chaque point de ce graphique représente un diamant défini par sa qualité, exprimée en carats, et son prix, exprimé en dollars.
+#' 
+#' Reprenons maintenant le jeu de données créé à partir du roman *Maria Chapdelaine*. Nous allons utiliser le diagramme de dispersion pour simplement observer, comme on l'a fait avec le diagramme à barres, les mentions de prénoms des prétendants de Maria. Nous avons trois variables à projeter sur la surface en deux dimensions du graphique: les chapitres, les prénoms et la fréquence de leur mention. Comme nous n'avons que deux axes (`x` et `y`), nous devrons utiliser un troisième élément esthétique pour représenter l'une des trois variables. En `x`, on mettra la variable indépendante, `chapitre`, en y, `frequence`, et on donnera à chaque point du graphique une forme correspondant à la troisième variable, `prenom`. Il n'y a que trois prénoms, donc trois formes distinctes. On utilise, dans les esthétiques, l'argument `shape=` pour indiquer la variable qui doit servir à créer les formes. `ggplot2` créera automatiquement une légende qu'il placera, par défaut, à droite du diagramme.
+#' 
+## -------------------------------------------------------------------------------
+
+p <- ggplot(pretendants_empiles_df, aes(x=chapitre, y=frequence, shape = prenom))
+
+p + geom_point()
+
+
+#' 
+#' Pour accentuer le contraste entre les points, on peut attribuer une couleur unique aux formes. Cela se fait aisément en utilisant l'argument `colour=` (ou `color=`) dans les esthétiques:
+#' 
+## -------------------------------------------------------------------------------
+
+p <- ggplot(pretendants_empiles_df, aes(x=chapitre, y=frequence, shape = prenom, colour = prenom))
+
+p + geom_point()
+
+
+#' 
+#' Puisque les formes et les couleurs s'appliquent directement aux points, créés avec la fonction `geom_point()`, on pourrait déplacer les précisions esthétiques dans la parenthèse de cette fonction sans modifier le diagramme. On a l'habitude de définir les éléments esthétiques qui s'appliqueront à chacun des éléments géométriques dans l'instruction initiale introduite par `ggplot()`, et à indiquer dans les arguments des fonctions `geom_***()` ceux qui s'appliquent uniquement à l'élément géométrique défini par la fonction. Par exemple, on pourrait superposer des points (formes) de différentes tailles de manière à faciliter leur repérage dans le diagramme. La forme la plus grande sera d'une couleur donnée, déterminée par la modalité spécifique de `prenom`, et la plus petite sera définie par une couleur unique, le blanc. On aura ainsi deux appels de la fonction `geom_point()` qui définiront, chacune, la couleur et la taille des points:
+#' 
+## -------------------------------------------------------------------------------
+
+p <- ggplot(pretendants_empiles_df, aes(x=chapitre, y=frequence, shape = prenom))
+
+p + geom_point(aes(colour = prenom), size = 4) +
+  geom_point(colour = "white", size = 1.5) +
+  xlab("Chapitre") +
+  ylab("Fréquence relative")
+
+
+
+#' 
+#' Le diagramme gagne en lisibilité, mais il est encore difficile d'en tirer une information pertinente, mis à part que "françois" atteint des sommets en fait de mentions, ce qui traduit l'importance qu'il prend dans les chapitres centraux du roman. Comme ici, il est parfois souhaitable de subdiviser le diagramme en autant de facettes qu'il y a de modalités dans la variable catégorielle d'intérêt. On peut faire une telle chose en utilisant la fonction `facet()` et en lui donnant, comme argument, la variable qui doit déterminer, par le nombre de ses modalités, le nombre de diagrammes à créer. On utilise l'opérateur `~` pour indiquer cette variable déterminante.
+#' 
+## -------------------------------------------------------------------------------
+
+# Ajout d'une couche geom_line()
+p <- ggplot(pretendants_empiles_df, aes(x=chapitre, y=frequence, shape = prenom))
+
+p + geom_point(aes(colour = prenom), size = 4)+
+  geom_point(colour = "white", size = 1.5)+
+  facet_wrap(~ prenom)+
+  theme(axis.text=element_text(size=6),  # La fonction theme() permet de réduire la taille
+        axis.title=element_text(size=12))+ # des caractères d'axes
+  xlab("Chapitre")+
+  ylab("Fréquence relative")
+
+
+#' 
+#' De mieux en mieux, non? On pourrait ajouter une autre couche géométrique au graphique, soit une ligne qui relie chacun des points de chaque graphique. Cette ligne sera noire si on ne définit aucune couleur, ou prendra la couleur des modalités de nom si on le précise dans ses éléments esthétiques:
+#' 
+## -------------------------------------------------------------------------------
+
+# Division du graphique en facettes
+
+p + geom_point(aes(colour = prenom), size = 4)+
+  geom_point(colour = "white", size = 1.5)+
+  geom_line(aes(group = prenom, colour = prenom))+
+  facet_wrap(~ prenom)+
+  theme(axis.text=element_text(size=6),
+        axis.title=element_text(size=12))+
+  xlab("Chapitre")+
+  ylab("Fréquence relative")
+
+
+#' 
+#' Trois facettes, trois prétendants. Pour aller plus loin, il faudrait travailler les données en amont, vérifier que les personnages ne sont pas mentionnés par des surnoms ou leur patronyme, se demander si on doit également prendre en compte leur évocation ou ce qu'ils représentent (*l'amour* pour François, *la vie facile* pour Lorenzo, *le devoir et la famille* pour Eutrope). En l'état, le graphique traduit tout de même des faits narratifs: François est celui dont le nom est le plus souvent convoqué dans le roman, ce qui traduit la focalisation dont il fait l'objet. Il apparaît tôt dans le roman, mais disparaît dans les bois et s'efface donc comme possible futur mari. Ne restent plus que Lorenzo et Eutrope. Ce dernier n'est jamais le "gagnant" en fait de mentions, mais il est celui qui reste là jusqu'à la fin et qui aura la main de Maria. Quant au chatoyant Lorenzo, il suscite un temps un grand intérêt, mais son étoile palit à la fin du roman, jusqu'à disparaître.
+#' 
+#' ## Défi
+#' 
+#' 1.  Videz l'environnement de travail avec l'instruction `rm(list=ls())` , puis importez le jeu de données ouvrages dans son format .RDS ou .csv;
+#' 2.  Créez un diagramme à barres montrant la distribution des ouvrages signés par les femmes et les hommes. Par défaut, la fonction `geom_bar()` a un argument `stat= "count"`. Vous n'avez donc aucun argument à fournir à cette fonction;
+#' 3.  Créez un nouveau diagramme à barres montrant la distribution des romans selon leur genre littéraire. Même si cela n'est pas nécessaire ici, vous pouvez transformer, avant de créer le diagramme, la variable `genre.litteraire` en variable catégorique;
+#' 4.  Faites en sorte que ce dernier diagramme prenne également en compte la variable du genre des auteur·e·s.
+#' 5.  Importez maintenant les données du fichier `filmographies_iconv.csv`.
+#' 6.  Ce tableau n'est pas pourvu d'identifiant unique; créez un tel identifiant (utilisez par exemple le numéro de ligne);
+#' 7.  Créez un diagramme de dispersion en utilisant, en x, la variable ANNEE et, en y, la variable doc_id que vous venez de créer;
+#' 8.  Colorez chaque point en fonction d'une troisième variable, telle GENRE.
+#' 
+#' ## Pour aller plus loin
+#' 
+#' Centre de la science de la biodiversité du Québec, Série d'ateliers R du CSBQ. [Atelier 3: introduction à la visualisation des données avec ggplot2](https://r.qcbs.ca/fr/workshops/r-workshop-03/)
+#' 
+#' Hadley Wickham et Garrett Grolemund, *R for Data Science. Import, Tidy, Transform, Visualize, and Model Data*, Sebastopol, O'Reilly.
+#' 
+#' Hadley Wickham, "A Layered Grammar of Graphics", *Journal of Computational and Graphical Statistics*, vol. 19, no 1, p. 3-28. DOI: 10.1198/jcgs.2009.07098
+#' 
+#' Winston Chang, *R Graphics Cookbook: Practical Recipes for Visualizing Data*, Second Edition, Sebastopol (CA), O'Reilly, 2018.

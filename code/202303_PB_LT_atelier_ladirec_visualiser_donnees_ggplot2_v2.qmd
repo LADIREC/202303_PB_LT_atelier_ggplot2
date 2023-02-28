@@ -1,7 +1,7 @@
 ---
 title: "Visualiser les données avec ggplot2"
 author: "Pascal Brissette"
-format: html
+format: pdf
 editor: visual
 ---
 
@@ -17,106 +17,63 @@ library(gutenbergr)
 library(stringr)
 ```
 
-Les graphiques sont l'un des plus puissants leviers d'explication des données. Il n'y a guère de meilleur moyen de parler des données et de les faire "parler" que de les donner à voir. L'utilisation des graphiques ne date pas d'hier. On peut admirer ci-dessous celui produit en 1869 par l'ingénieur Charles Joseph Mignard. Celui-ci illustre les pertes colossales subies par la Grande Armée (450 000 hommes) de Napoléon au cours de la Campagne de Russie. L'épaisseur du trait indique la quantité d'hommes, la couleur, la direction de la marche. Bien que fondé sur de solides statistiques, ce graphique donne à voir un phénomène qui ne requiert aucune connaissance des statistiques. En quelques traits, il synthétise toute une histoire.
+Les graphiques sont l'un des plus puissants leviers d'explication des données. Il n'y a guère de meilleur moyen de parler des données et de les faire "parler" que de les donner à voir.
 
-[![Charles Joseph Minard, "Carte figurative des pertes successives en hommes de l'armée française dans la campagne de Russie 1812-1813", 1869](images/minard_campagne_russie.png){fig-align="center"}](https://fr.wikipedia.org/wiki/Charles_Joseph_Minard)
+L'utilisation des graphiques ne date pas d'hier. On peut admirer ci-dessous celui produit en 1869 par l'ingénieur Charles Joseph Mignard. Celui-ci illustre les pertes colossales subies par la Grande Armée (450 000 hommes) de Napoléon au cours de la Campagne de Russie. L'épaisseur du trait indique la quantité d'hommes; l'échelle, la distance parcourue; la couleur, la direction de la marche; la partie du bas, les variations de température. Y sont ajoutés les noms de villes traversés par l'armée française. Bien que fondé sur de solides statistiques, ce graphique donne à voir un phénomène qui ne requiert aucune connaissance des statistiques. En quelques traits, il intègre en un système cohérent une multitude de données de divers types et il raconte toute une histoire. C'est un modèle de *data storytelling*.
+
+[![Charles Joseph Minard, "Carte figurative des pertes successives en hommes de l\'armée française dans la campagne de Russie 1812-1813", 1869](images/minard_campagne_russie.png){fig-align="center"}](https://fr.wikipedia.org/wiki/Charles_Joseph_Minard)
 
 ## Programme de l'atelier
 
-Dans le présent atelier, vous aurez l'occasion de vous initier à la grammaire des graphiques et à l'extension `ggplot2`, ainsi qu'aux graphiques à barres et de dispersion. Avant d'en venir aux graphiques, il faut cependant introduire un type de données, dites "catégorielles", fréquemment utilisées dans la création des graphiques.
+Comment fabrique-t-on un graphique à partir de données textuelles? Cette question est au coeur de l'atelier et nous allons la traiter de manière pratique. Un nombre très limité de concepts seront abordés avant de plonger dans le code:
 
-## Les facteurs
+-   Les principaux **type** de données
 
-Pour expliquer ce qu'est un facteur ou une donnée catégorielle, rien de mieux que d'utiliser un exemple simple. Soit le tableau de données suivant, indiquant de manière aléatoire les profits mensuel de vente de vêtements d'occasion.
+-   Les **vecteurs** et les **tableaux de données** dans R
 
-```{r}
+-   Variable **discrète** et variable **continue**
 
-calendrier_profit_df <- data.frame(mois = sample(month.name, size = 50, replace = T),
-                            profit = round(sample(1:500, size = 50, replace = T)))
+-   **Grammaire** des graphiques
 
-head(calendrier_profit_df)
+## Les types de données
 
-```
+Il existe trois grands types de données:
 
-Le tableau comporte 50 lignes, mais même s'il en avait 5000, il n'y aurait jamais d'autre modalité dans la première colonne que ceux du calendrier grégorien. À moins que la personne ayant entré les données ait fait des erreurs dans l'orthographe des noms de mois, bien sûr, mais on y reviendra plus ci-dessous. Le fait est que si le vendeur a bien fait son travail, le nombre maximal de modalités dans la première colonne est de 12. On peut en observer la distribution comme suit:
+1.  les nombres (*numeric*);
 
-```{r}
+2.  les chaînes de caractères (*character*);
 
-table(calendrier_profit_df$mois)
+3.  les booléens (*logical*).
 
-```
-
-Le vecteur de type `character`, quand il comporte un nombre **fini** et **limité** de modalités, gagne souvent à être converti en objet **`factor`**. Les objets `factors` ne sont pas stockés en mémoire comme des chaînes de caractères, mais comme des nombres correspondant aux niveaux distincts. Cela réduit donc de manière importante la taille du vecteur en mémoire et améliore les performances des analyses statistiques. De plus, les modalités distinctes d'un objet factor peuvent être ordonnés, ce qui est très utile lorsque, dans un graphique, on souhaite présenter les données d'une manière très précise.
-
-Prenons à nouveau l'exemple des mois du calendrier. Si je demande à R d'ordonner les douze mois du calendrier, il ne comprendra pas ce que je veux: il prendra les chaînes de caractères que je lui donne et ordonnera la série par ordre alphabétique, en prenant la première lettre du mois comme point de comparaison. Voyons ce que cela donne:
+Deux de ces types de données se déclinent en sous-types dans R. Les données numériques seront des **nombres entiers** (*integer*) ou des **nombres à décimales** (*double*) selon le contexte, et les chaines de caractères peuvent correspondre à des données catégorielles lorsque leur variété est limitée (exemple: les douzes mois de l'année).
 
 ```{r}
+library(tibble)
 
-mois_c <- c("février", "janvier", "novembre","mars", "octobre", "avril", "mai", "juin",
-            "juillet", "août","septembre","août", "mars", "février", "décembre", "juin")
-
-sort(mois_c)
-
+tribble(~"Variable R", ~"Type", ~"Exemple",
+        "integer", "nombre entier", "1, 15, 100",
+        "double", "nombre à fraction", "1.15, -0.45009",
+        "character", "chaîne de caractères", '"Abigaëlle", "Je suis curieux"',
+        "logical", "booléen", "TRUE ou FALSE",
+        "factor", "catégorielle", '"janvier", "février", "mars"',
+        "NA", "sans objet", "NA",
+        "empty", "valeur nulle", "NULL"
+        )
 ```
 
-Lorsque je demande à ordonner ce vecteur, R place les mois d'août et d'avril en tête de vecteur, suivis par décembre. C'est ici que la fonction `factor()`, qui transforme une donnée en donnée catégorielle, peut être utile. Avec l'argument `levels =`, nous pourrons imposer un ordre. Et comme les mois sont en nombre finis, on ne risque pas de croiser dans nos données des modalités autres que les douze que nous allons définir.
+Le graphique de Minard présenté en introduction contient à la fois des chaines de caractères (noms de villes et de cours d'eau), des nombres entiers (quantité de soldats) et des nombres à décimales (la température).
 
-```{r}
+## Les vecteurs et les tableaux de données dans R
 
-# On peut créer un vecteur qui indiquera à la fonction `factor()` quel ordre je souhaite donner à mes données catégoriques (argument `levels=`)
-ordre_mois <- c("janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août",
-                  "septembre", "octobre", "novembre", "décembre")
+Pour manipuler les données, il faut les emmagasiner dans des variables, des conteneurs dont le contenu est appelé à changer au fil des opérations (d'où le nom "variable" attribuer aux conteneurs). Les structures de données varient selon le nombre de dimensions qu'elles comportent (1 à *n* dimensions) et le nombre de types qu'elles acceptent. Le vecteur et la matrice, par exemple, sont dits "atomiques", c'est-à-dire qu'on ne peut y mettre qu'un seul type de données. Le premier possède une seule dimension tandis que la seconde en a deux. Le tableau de données, très utilisé en science des données, est très polyvalent: il accepte des données de plusieurs types (un seul type par colonne, cependant) et possède deux dimensions.
 
-# On transforme ainsi le vecteur mois_c, de type `character`, en vecteur catégorique (facteur)
-mois_f <- factor(x = mois_c,
-       levels = ordre_mois)
+[![Structures de données dans R](images/fig1.png)](https://bookdown.org/introrbook/intro2r/data-types-and-structures.html)
 
-# On peut vérifier le type de l'objet
-class(mois_f)
+## Données discrètes et données continues
 
-# On peut trier les valeurs selon l'ordre fourni à l'argument `levels=`
-sort(mois_f)
+On appelle variables discrètes celles dont les valeurs correspondent et ne peuvent correspondre qu'à des nombres **entiers** et **finis**. La quantité de soldats formant l'armée ne peut prendre aucune valeur entre 0 et 1 ou entre 10 000 et 10 001. Ces données sont dites discrètes. À l'opposé, la distance ou le temps fournissent des variables continues, dont le défilement est continu et qu'on peut toujours découper plus finement.
 
-# Ou selon l'ordre inversé
-sort(mois_f, decreasing = TRUE)
-
-```
-
-Un autre intérêt des facteurs est qu'ils peuvent aider à repérer d'eventuelles erreurs typographiques dans les modalités. Supposons qu'il y ait une telle erreur dans mon vecteur initial. Je vais ordonner ce vecteur de charactères selon un ordre défini dans l'argument `levels=` de la fonction `factor()`, comme je l'ai fait ci-dessus. Voyez le résultat lorsque j'appelle le vecteur catégorique:
-
-```{r}
-
-# Création d'un vecteur comprenant 16 éléments (répétition de certains noms de mois, dont l'un mal orthographié)
-mois_c <- c("février", "janvier", "movembre","mars", "octobre", "avril", "mai", "juin",
-            "juillet", "août","septembre","août", "mars", "février", "décembre", "juin")
-
-# Le vecteur de caractères est transformé en facteur. L'ordre des mois est précisé avec levels=
-mois_f <- factor(x = mois_c,levels = c("janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août","septembre", "octobre", "novembre", "décembre"))
-
-mois_f
-
-```
-
-Le mois qui a été mal orthographié dans le vecteur des valeurs ne correspond pas à l'une des catégories indiquées dans l'argument `levels=`. L'appel du vecteur catégorique renvoit donc `<NA>` à sa position.
-
-Si vous demandez à R de vous fournir la structure du vecteur catégorique, vous verrez une série de chiffres qui pourrait attirer votre attention:
-
-```{r}
-
-str(mois_f)
-
-```
-
-La fonction `str()` confirme d'abord que le vecteur est de type catégorique (`factor`) et qu'il comporte 12 catégories (`levels`). Les deux premiers niveaux vous sont indiqués ("janvier", "février"), puis suit un vecteur numérique. À quoi cela correspond-il?
-
-C'est une particularité de la variable catégorique de se présenter sous la forme de caractères, mais d'être emmagasinée dans R comme une suite de nombres entiers. La variable catégorique est une variable discrète et comme il n'y a pas d'intervalle entre les catégories, R peut associer à chacune, selon l'ordre que l'on a indiqué dans `levels=`, un nombre entier positif. De sorte que si on demande à R à quoi correspondent les données de notre vecteur avec `typeof()`, il nous dira qu'il s'agit d'*integer*:
-
-```{r}
-
-class(mois_f) # la structure est de type factor
-typeof(mois_f) # les données elles-mêmes sont de type numérique (integer)
-
-```
+Quelles sont les variables discrètes et continues dans le graphique de Minard? Pouvez-vous faire le lien avec la dimension esthétique du tableau, soit l'élément visuel chargé de représenter ces variables?
 
 ## La grammaire des graphiques (GG)
 
@@ -134,7 +91,7 @@ Dans la grammaire des graphiques, une couche est composée des éléments suivan
 
 Le graphique est le résultat de la superposition de ces couches. Certaines sont facultatives ou sont pourvues de valeurs par défaut, d'autres sont nécessaires et doivent être précisées par l'utilisateur:
 
-[![Capture de l'antisèche ggplot2, RStudio](images/ggplot_min.jpg){fig-align="center"}](https://www.rstudio.com/resources/cheatsheets/)
+[![Capture de l\'antisèche ggplot2, RStudio](images/ggplot_min.jpg){fig-align="center"}](https://www.rstudio.com/resources/cheatsheets/)
 
 +---------------------------+-------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | Élément                   | Fonction                                  | Explications                                                                                                                                                                                                                                                                                        |
