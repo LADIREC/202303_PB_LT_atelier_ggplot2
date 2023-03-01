@@ -17,9 +17,9 @@ library(gutenbergr)
 library(stringr)
 ```
 
-Les graphiques sont l'un des plus puissants leviers d'explication des données. Il n'y a guère de meilleur moyen de parler des données et de les faire "parler" que de les donner à voir.
+Les graphiques sont l'un des plus puissants leviers d'explication des données. Il n'y a guère de meilleur moyen de parler des données et de les donner à voir.
 
-L'utilisation des graphiques ne date pas d'hier. On peut admirer ci-dessous celui produit en 1869 par l'ingénieur Charles Joseph Mignard. Celui-ci illustre les pertes colossales subies par la Grande Armée (450 000 hommes) de Napoléon au cours de la Campagne de Russie. L'épaisseur du trait indique la quantité d'hommes; l'échelle, la distance parcourue; la couleur, la direction de la marche; la partie du bas, les variations de température. Y sont ajoutés les noms de villes traversés par l'armée française. Bien que fondé sur de solides statistiques, ce graphique donne à voir un phénomène qui ne requiert aucune connaissance des statistiques. En quelques traits, il intègre en un système cohérent une multitude de données de divers types et il raconte toute une histoire. C'est un modèle de *data storytelling*.
+L'utilisation des graphiques ne date pas d'hier. On peut admirer ci-dessous celui produit en 1869 par l'ingénieur Charles Joseph Mignard. Le graphique illustre les pertes colossales subies par la Grande Armée (450 000 hommes) de Napoléon au cours de la Campagne de Russie. L'épaisseur du trait indique la quantité d'hommes; l'échelle, la distance parcourue; la couleur, la direction de la marche; la partie du bas, les variations de température. Y sont ajoutés les noms de villes traversés par l'armée française. Bien que fondé sur de solides statistiques, ce graphique donne à voir un phénomène qui ne requiert aucune connaissance des statistiques. En quelques traits, il intègre en un système cohérent une multitude de données de divers types et il raconte toute une histoire. C'est un modèle de *data storytelling*.
 
 [![Charles Joseph Minard, "Carte figurative des pertes successives en hommes de l\'armée française dans la campagne de Russie 1812-1813", 1869](images/minard_campagne_russie.png){fig-align="center"}](https://fr.wikipedia.org/wiki/Charles_Joseph_Minard)
 
@@ -27,25 +27,25 @@ L'utilisation des graphiques ne date pas d'hier. On peut admirer ci-dessous celu
 
 Comment fabrique-t-on un graphique à partir de données textuelles? Cette question est au coeur de l'atelier et nous allons la traiter de manière pratique. Un nombre très limité de concepts seront abordés avant de plonger dans le code:
 
--   Les principaux **type** de données
+-   Les principaux **type** de données;
 
--   Les **vecteurs** et les **tableaux de données** dans R
+-   Les **vecteurs** et les **tableaux de données** dans R;
 
--   Variable **discrète** et variable **continue**
+-   Variable **discrète** et variable **continue;**
 
--   **Grammaire** des graphiques
+-   **Grammaire** des graphiques.
 
 ## Les types de données
 
 Il existe trois grands types de données:
 
-1.  les nombres (*numeric*);
+1.  les **nombres** (*numeric*);
 
-2.  les chaînes de caractères (*character*);
+2.  les **chaînes de caractères** (*character*);
 
-3.  les booléens (*logical*).
+3.  les **booléens** (*logical*).
 
-Deux de ces types de données se déclinent en sous-types dans R. Les données numériques seront des **nombres entiers** (*integer*) ou des **nombres à décimales** (*double*) selon le contexte, et les chaines de caractères peuvent correspondre à des données catégorielles lorsque leur variété est limitée (exemple: les douzes mois de l'année).
+Deux de ces types de données se déclinent en sous-types dans R. Les données numériques seront des **nombres entiers** (*integer*) ou des **nombres à décimales** (*double*) selon le contexte, et les chaines de caractères peuvent correspondre à des données catégorielles lorsque leur variété est limitée (exemple: les douzes mois de l'année). Voici un résumé des types de variables avec des exemples concrets:
 
 ```{r}
 library(tibble)
@@ -65,21 +65,32 @@ Le graphique de Minard présenté en introduction contient à la fois des chaine
 
 ## Les vecteurs et les tableaux de données dans R
 
-Pour manipuler les données, il faut les emmagasiner dans des variables, des conteneurs dont le contenu est appelé à changer au fil des opérations (d'où le nom "variable" attribuer aux conteneurs). Les structures de données varient selon le nombre de dimensions qu'elles comportent (1 à *n* dimensions) et le nombre de types qu'elles acceptent. Le vecteur et la matrice, par exemple, sont dits "atomiques", c'est-à-dire qu'on ne peut y mettre qu'un seul type de données. Le premier possède une seule dimension tandis que la seconde en a deux. Le tableau de données, très utilisé en science des données, est très polyvalent: il accepte des données de plusieurs types (un seul type par colonne, cependant) et possède deux dimensions.
+Pour manipuler les données, il faut les emmagasiner dans des variables, c'est-à-dire des conteneurs dont le contenu est appelé à changer au fil des opérations (d'où le nom "variable" attribué aux conteneurs). Les structures de données varient selon le nombre de dimensions qu'elles comportent (1 à *n* dimensions) et selon que leurs données sont homogènes (1 seul type) ou hétérogènes (plusieurs types). Le vecteur et la matrice, par exemple, sont dits "atomiques", c'est-à-dire qu'on ne peut y mettre qu'un seul type de données. Le vecteur possède une seule dimension tandis que la matrice en possède deux. Le tableau de données, très utilisé en science des données, est très polyvalent: il accepte des données de plusieurs types (un seul type par colonne, cependant) et possède deux dimensions.
 
 [![Structures de données dans R](images/fig1.png)](https://bookdown.org/introrbook/intro2r/data-types-and-structures.html)
+
+Si on devait reconstituer le modèle de données à l'origine de la carte de Mignard sous la forme d'un tableau, on pourrait suggérer les variables suivantes (avec deux observations en guise d'exemple):
+
+```{r}
+
+tribble(~id, ~ville, ~longitude, ~latitude, ~direction_marche, ~nbre_soldats, ~temperature,
+        1, "kowno", 23.903597, 54.898521, "est", 422000, NA,
+        2, "Wilna", 25.279800, 54.6891600, "est", 400000, NA)
+```
 
 ## Données discrètes et données continues
 
 On appelle variables discrètes celles dont les valeurs correspondent et ne peuvent correspondre qu'à des nombres **entiers** et **finis**. La quantité de soldats formant l'armée ne peut prendre aucune valeur entre 0 et 1 ou entre 10 000 et 10 001. Ces données sont dites discrètes. À l'opposé, la distance ou le temps fournissent des variables continues, dont le défilement est continu et qu'on peut toujours découper plus finement.
 
-Quelles sont les variables discrètes et continues dans le graphique de Minard? Pouvez-vous faire le lien avec la dimension esthétique du tableau, soit l'élément visuel chargé de représenter ces variables?
+Quelles sont les variables discrètes et continues dans le graphique de Minard? Pouvez-vous établir un lien entre ces types de variables et les aspects esthétiques du tableau, c'est-à-dire les éléments visuels chargés de représenter ces variables?
+
+[![Types de variables et de graphiques](images/f-d_5aa7215bc54b5dd010878d9afd7d2f9964490ecd745cd9f8a523763c+IMAGE+IMAGE.1){fig-align="center"}](https://www.ck12.org/book/ck-12-basic-probability-and-statistics-concepts---a-full-course/section/8.0/)
 
 ## La grammaire des graphiques (GG)
 
-L'extension de base `graphics`, activée dès que l'on ouvre RStudio, permet de créer rapidement des graphiques avec la fonction `plot()`. Les utilisateurs de R utilisent plutôt `ggplot2`, qui permet de créer des graphiques de plus grande qualité et de mieux contrôler les paramètres de chaque élément. Cette extension implémente dans R la grammaire des graphiques proposée par [Wilkinson en 2005](https://link.springer.com/book/10.1007/0-387-28695-0).
+L'extension de base `graphics`, activée dès qu'on lance RStudio, permet de créer rapidement des graphiques avec la fonction `plot()`. Les utilisateurs de R utilisent plutôt `ggplot2`, qui permet de créer des graphiques de plus grande qualité et de mieux contrôler les paramètres de chaque élément. Cette extension implémente dans R la grammaire des graphiques proposée par [Wilkinson en 2005](https://link.springer.com/book/10.1007/0-387-28695-0).
 
-Les graphiques sont composés de plusieurs éléments: des mesures, des formes, des titres, des ensembles de couleurs, des coordonnées, des axes et, bien entendu, des données. Il s'agit donc d'objets complexes que la grammaire des graphiques permet de décomposer et de régler séparément. Outre l'ouvrage de Wilkinson, vous lirez avec profit l'article de Hadley Wickham, auteur des extensions ggplot et [ggplot2](https://cran.r-project.org/web/packages/ggplot2/index.html), ainsi que son ouvrage, [*ggplot2: Elegant Graphics for Data Analysis*](https://ggplot2-book.org/mastery.html).
+Les graphiques sont composés de plusieurs éléments: des mesures, des formes, des titres, des ensembles de couleurs, des coordonnées, des axes et, bien entendu, des données. Il s'agit donc d'objets complexes que la grammaire des graphiques permet de décomposer et de régler séparément. Outre l'ouvrage de Wilkinson, vous lirez avec profit l'article et l'ouvrage de Hadley Wickham, auteur des extensions ggplot et [ggplot2](https://cran.r-project.org/web/packages/ggplot2/index.html), indiqués dans la bibliographie.
 
 Dans la grammaire des graphiques, une couche est composée des éléments suivants:
 
@@ -93,53 +104,55 @@ Le graphique est le résultat de la superposition de ces couches. Certaines sont
 
 [![Capture de l\'antisèche ggplot2, RStudio](images/ggplot_min.jpg){fig-align="center"}](https://www.rstudio.com/resources/cheatsheets/)
 
-+---------------------------+-------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Élément                   | Fonction                                  | Explications                                                                                                                                                                                                                                                                                        |
-+===========================+===========================================+=====================================================================================================================================================================================================================================================================================================+
-| **Données**               | `ggplot()`                                | Fonction d'initialisation du graphique. On y insère généralement le **tableau de données** dont les variables serviront à définir les éléments esthétiques. Ces éléments esthétiques, `aes()`, peuvent être insérés dans cette fonction s'ils sont identiques pour toutes les couches du graphique. |
-+---------------------------+-------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| **Éléments esthétiques**  | `aes()`                                   | Éléments esthétiques, précisés comme argument `mapping=` de la fonction d'initialisation s'ils sont identitques pour toutes les couches du graphique, ou à l'intérieur des fonctions commençant par `geom_` s'ils sont différents.                                                                  |
-|                           |                                           |                                                                                                                                                                                                                                                                                                     |
-|                           |                                           | Parmi les éléments esthétiques, on trouve:                                                                                                                                                                                                                                                          |
-|                           |                                           |                                                                                                                                                                                                                                                                                                     |
-|                           |                                           | -   `x` et `y` ==\> variables qui définissent respectivement les axes x et y du graphique;                                                                                                                                                                                                          |
-|                           |                                           |                                                                                                                                                                                                                                                                                                     |
-|                           |                                           | -   `fill` ==\> variable qui définit la couleur de remplissage des formes géométriques;                                                                                                                                                                                                             |
-|                           |                                           |                                                                                                                                                                                                                                                                                                     |
-|                           |                                           | -   `colour` ==\> variable qui définit la couleur des contours des formes géométriques;                                                                                                                                                                                                             |
-|                           |                                           |                                                                                                                                                                                                                                                                                                     |
-|                           |                                           | -   `size` ==\> variable qui définit la taille des points ou des lignes;                                                                                                                                                                                                                            |
-|                           |                                           |                                                                                                                                                                                                                                                                                                     |
-|                           |                                           | -   `alpha` ==\> le degré de transparence des formes géométriques (entre 0 et 1);                                                                                                                                                                                                                   |
-|                           |                                           |                                                                                                                                                                                                                                                                                                     |
-|                           |                                           | -   `shape` ==\> variable qui définit des formes géométriques en complément des points, dans un graphique à points.                                                                                                                                                                                 |
-+---------------------------+-------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| **Éléments géométriques** | `geom_point()`                            | diagramme de dispersion (à points)                                                                                                                                                                                                                                                                  |
-+---------------------------+-------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-|                           | `geom_bar()`                              | diagramme à barres. Prend une variable catégorique en x. Par défaut, compte le nombre de valeurs par catégorie (x).                                                                                                                                                                                 |
-+---------------------------+-------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-|                           | `geom_col()`                              | diagramme à barres. Prend une variable catégorique en x et une variable numérique en y. Équivalent de geom_bar(stat="identity") avec définition d'une variable continue y.                                                                                                                          |
-+---------------------------+-------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-|                           | `geom_histogram()`                        | diagramme à barres. Prend des variables continues en x et en y. Par défaut, bins=30.                                                                                                                                                                                                                |
-+---------------------------+-------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| **Facettes**              | `facet_wrap()` ou `facet_grid()`          | distribue les modalités d'une variable catégorique en plusieurs graphiques de formats réduits.                                                                                                                                                                                                      |
-+---------------------------+-------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| **Statistiques**          | `stat_identity()`, `stat_summary()`, etc. | Précise les opérations statistiques faites sur les données avant de les afficher dans le graphique.                                                                                                                                                                                                 |
-+---------------------------+-------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| **Coordonnées**           | `coord_cartesian()`                       | Permet de fixer des limites aux axes x et y, ce qui a pour effet d'aggrandir une portions du graqphique.                                                                                                                                                                                            |
-+---------------------------+-------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-|                           | `coord_map()`                             | Projette une portion de la géographie terrestre sur une carte en 2 dimensions.                                                                                                                                                                                                                      |
-+---------------------------+-------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| **Thèmes**                | `theme_grey()`, `theme_light()`, etc.     | Série de fonctions permettant de préciser les éléments esthétiques du graphique qui ne concernent pas les données (couleur et opacité du fond, police de caractères, etc.)                                                                                                                          |
-+---------------------------+-------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+Le tableau ci-dessous fournit quelques précisions supplémentaires. Il ne faut pas essayer de mémoriser ces informations. Il est plus intéressant et productif de procéder par essai et erreur, puis de se référer au tableau et à l'abondante documentation sur la grammaire des graphiques pour approfondir la compréhension du processus.
 
-Les quelques éléments indiqués dans le tableau ci-dessus donnent une faible idée de la richesse de l'extension `ggplot2`, dont le développement est assuré par une équipe de programmeurs. À peu près toutes les composantes d'un graphique peuvent être contrôlés, pour peu qu'on ait la patience de lire la documentation, abondante, ou de chercher de l'aide en ligne (ex: [Stack Overflow](https://stackoverflow.com/)).
++---------------------------+-------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Élément                   | Fonction                                  | Explications                                                                                                                                                               |
++===========================+===========================================+============================================================================================================================================================================+
+| **Données**               | `ggplot()`                                | Fonction d'initialisation du graphique. On y insère généralement le **tableau de données** dont les variables serviront à définir les éléments esthétiques.                |
++---------------------------+-------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| **Éléments esthétiques**  | `aes()`                                   | Éléments esthétiques.                                                                                                                                                      |
+|                           |                                           |                                                                                                                                                                            |
+|                           |                                           | Parmi ces éléments, on trouve:                                                                                                                                             |
+|                           |                                           |                                                                                                                                                                            |
+|                           |                                           | -   `x` et `y` ==\> variables qui définissent respectivement les axes x et y du graphique;                                                                                 |
+|                           |                                           |                                                                                                                                                                            |
+|                           |                                           | -   `fill` ==\> variable qui définit la couleur de remplissage des formes géométriques;                                                                                    |
+|                           |                                           |                                                                                                                                                                            |
+|                           |                                           | -   `colour` ==\> variable qui définit la couleur des contours des formes géométriques;                                                                                    |
+|                           |                                           |                                                                                                                                                                            |
+|                           |                                           | -   `size` ==\> variable qui définit la taille des points ou des lignes;                                                                                                   |
+|                           |                                           |                                                                                                                                                                            |
+|                           |                                           | -   `alpha` ==\> le degré de transparence des formes géométriques (entre 0 et 1);                                                                                          |
+|                           |                                           |                                                                                                                                                                            |
+|                           |                                           | -   `shape` ==\> variable qui définit des formes géométriques en complément des points, dans un graphique à points.                                                        |
++---------------------------+-------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| **Éléments géométriques** | `geom_point()`                            | diagramme de dispersion (à points)                                                                                                                                         |
++---------------------------+-------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+|                           | `geom_bar()`                              | diagramme à barres. Prend une variable catégorique en x. Par défaut, compte le nombre de valeurs par catégorie (x).                                                        |
++---------------------------+-------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+|                           | `geom_col()`                              | diagramme à barres. Prend une variable catégorique en x et une variable numérique en y. Équivalent de geom_bar(stat="identity") avec définition d'une variable continue y. |
++---------------------------+-------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+|                           | `geom_histogram()`                        | diagramme à barres. Prend des variables continues en x et en y. Par défaut, bins=30.                                                                                       |
++---------------------------+-------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| **Facettes**              | `facet_wrap()` ou `facet_grid()`          | distribue les modalités d'une variable catégorique en plusieurs graphiques de formats réduits.                                                                             |
++---------------------------+-------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| **Statistiques**          | `stat_identity()`, `stat_summary()`, etc. | Précise les opérations statistiques faites sur les données avant de les afficher dans le graphique.                                                                        |
++---------------------------+-------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| **Coordonnées**           | `coord_cartesian()`                       | Permet de fixer des limites aux axes x et y, ce qui a pour effet d'aggrandir une portions du graqphique.                                                                   |
++---------------------------+-------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+|                           | `coord_map()`                             | Projette une portion de la géographie terrestre sur une carte en 2 dimensions.                                                                                             |
++---------------------------+-------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| **Thèmes**                | `theme_grey()`, `theme_light()`, etc.     | Série de fonctions permettant de préciser les éléments esthétiques du graphique qui ne concernent pas les données (couleur et opacité du fond, police de caractères, etc.) |
++---------------------------+-------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+Ces quelques éléments donnent une faible idée de la richesse de l'extension `ggplot2`, dont le développement est assuré par une équipe de programmeurs. À peu près toutes les composantes d'un graphique peuvent être contrôlés.
 
 On notera également que plusieurs extensions prennent appui sur `ggplot2` pour projeter l'art du graphique à un tout autre niveau. Par exemple, l'extension [`plotly`](https://cran.r-project.org/web/packages/plotly/index.html) permet d'interagir avec le graphique à l'aide d'un menu directement accessible avec la souris. D'autres extensions améliorent le rendu de graphiques spéciaux (cartes thermiques, cartes géographiques, réseaux, etc.).
 
 ## Le diagramme à barres
 
-Revenons aux bases et voyons comment se combinent concrètement les éléments d'un graphique. Nous allons utiliser un jeu de données construit à partir du roman *Maria Chapdelaine*, de Louis Hémon, un roman français devenu un classique de la littérature québécoise (!). Dans le bloc d'instructions ci-dessous, que vous pouvez simplement ignorer (le prétraitement de données textuelles n'est pas le sujet de l'atelier), le texte de Louis Hémon est importé depuis le [Projet Gutenberg](https://www.gutenberg.org/), puis traité pour forger une table comprenant, pour chacun des chapitres, le nombre de mots.
+Revenons aux bases et voyons comment se combinent concrètement les éléments d'un graphique. Nous allons utiliser un jeu de données construit à partir du roman *Maria Chapdelaine*, de Louis Hémon, un roman français devenu un classique de la littérature québécoise (!). Dans le bloc d'instructions ci-dessous, le texte de Louis Hémon est importé depuis le [Projet Gutenberg](https://www.gutenberg.org/), puis traité pour forger une table comprenant, pour chacun des chapitres, le nombre de mots.
 
 ```{r}
 #| include: false
@@ -190,7 +203,7 @@ mots_chapitres_df <- data.frame(chapitre = c("I", "II", "III", "IV", "V", "VI", 
 # ... une colonne où seront rassemblés tous les mots sous forme de liste:
 mots_chapitres_df$mots <- sapply(mots_chapitres, "[")
 
-# Et une colonne indiquant le nombre de mots: de chaque chapitre
+# Et une colonne indiquant le nombre de mots de chaque chapitre
 mots_chapitres_df$longueur_chap <- sapply(mots_chapitres, length)
 
 # Création d'une colonne avec tous les mots de chaque chapitre distinct joints en une seule chaine de caractères
@@ -218,7 +231,7 @@ colSums(mots_chapitres_df[, c(5:7)])
 
 ```
 
-Nous allons créer un nouveau tableau de données pour ces données agrégées, et les projeter dans un premier graphique à barres.
+Avec récupérer le résultat de la fonction colSums() et créer avec celui-ci un tableau dont les données serviront à construire notre premier graphique.
 
 ```{r}
 
@@ -252,7 +265,7 @@ p3
 
 On notera l'utilisation de l'opérateur `+` pour l'ajout des éléments aux couches.
 
-La hauteur de chaque colonne est déterminée par la fréquence (valeur numérique) associée à chaque prénom. On peut indiquer ces valeurs directement sur les colonnes respectives. Profitons-en pour alléger modifier le thème en utilisant l'une des fonctions commençant par `theme_` :
+La hauteur de chaque colonne est déterminée par la fréquence (valeur numérique) associée à chaque prénom. On peut indiquer ces valeurs directement sur les colonnes respectives. Profitons-en pour alléger le thème en utilisant l'une des fonctions commençant par `theme_` :
 
 ```{r}
 
@@ -262,9 +275,28 @@ p3 +
 
 ```
 
-Le diagramme à barres est très efficace pour représenter des jeux de données où les modalités des variables discrètes sont en nombre relativement limité. Lorsque ces modalités sont très nombreuses, le graphique peut devenir confus.
+Le diagramme à barres est très efficace pour représenter des jeux de données où les modalités des **variables discrètes** sont en nombre relativement limité. Lorsque ces modalités sont très nombreuses, le graphique peut devenir confus, à moins de mettre à profit un élément esthétique comme des formes ou des couleurs pour représenter une dimension des données.
 
-Voyons cela avec les valeurs non agrégées du premier tableau de données, `mots_chapitres_df`. Comme cela arrive fréquemment, il faut modifier la structure du tableau pour que toutes les valeurs numériques associées au fréquences soient contenues dans une seule colonne. On empile pour ainsi dire les valeurs numériques en prenant soin qu'une autre colonne indique le prenom du pretendant et le numero du chapitre auxquels les valeurs sont associées. La fonction `reshape()` de base R permet de faire ce type d'opération, mais il existe des extensions spécialisées qui simplifient le processus (tidyr et data.table, notamment).
+## Ajout d'un élément esthétique au diagramme à barre
+
+Regardons à nouveau la structure du tableau avec les données non agrégées, `mots_chapitres_df`.
+
+```{r}
+
+head(mots_chapitres_df, 3)
+```
+
+Supposons que nous souhaitions observer les occurrences des prénoms des prétendants dans tous les chapitres du roman Maria Chapdelaine. Le tableau de données fournit ces informations: chaque ligne correspond à un chapitre et on a, pour chacun des prénoms, les valeurs correspondant aux occurrences. Le problème est qu'il n'y a que deux axes dans le graphique (x et y) et que nous avons trois informations: chapitre, prénom, occurrences. Les occurrences sont des valeurs numériques discrètes qui peuvent être projetés sur l'axe y. Normalement, pour observer une progression naturelle en fonction des chapitres, on voudrait placer ceux-ci sur l'axe des x. Pour intégrer au graphique l'information catégorielle "prénom", on peut recourir à un élément esthétique comme des couleurs.
+
+Dans sa forme actuelle, cependant, le tableau ne convient pas. Les prénoms correspondent à trois colonnes distinctes. Voyez:
+
+```{r}
+head(mots_chapitres_df[, c("chapitre", "francois", "lorenzo", "eutrope")], 3)
+```
+
+Il est impossible de fournir ce tableau de données en entrée à la fonction `ggplot()`. Pour utiliser les informations qu'il contient, il faudra rassembler les trois prénoms dans une variable catégorielle. Au lieu de les utiliser comme nom de colonne, il faut faire de ces prénoms les valeurs d'une colonne que nous allons justement appeler `prenom`.
+
+La fonction `reshape()` de base R permet de transformer la structure des tableaux.
 
 ```{r}
 
@@ -278,9 +310,11 @@ pretendants_empiles_df <- reshape(
   direction = "long"
   )
 
-tail(pretendants_empiles_df)
+pretendants_empiles_df
 
 ```
+
+Il reste une petite opération à faire avant de créer le graphique. Les valeurs de la variable "chapitre" sont de simples chaînes de caractères. Si nous les projetons telles quelles dans un graphique, R ordonnera ces chaînes selon l'ordre alphabétique de la première lettre et il placera donc côte-à-côte les chapitres I, II, III, IV et IX. Pour imposer un ordre particulier à ces titres de chapitre, il faut les emmagasiner dans un vecteur de type catégoriel. La fonction `factor()` comporte un argument, `level=`, qui permet de déterminer l'ordre des catégories.
 
 ```{r}
 
@@ -291,22 +325,24 @@ head(pretendants_empiles_df)
 
 ```
 
-Nous avons maintenant trois séries d'information à transposer dans un graphique: le **prénom** de chacun des prétendants de Maria, la **fréquence** où ce prénom apparait dans chacun des **chapitres**. On ne peut désolidariser ces séries d'éléments et il faut trouver le moyen de les projeter dans un graphique à deux dimensions.
-
-Pour transposer ces trois variables dans un graphique, on peut soit utiliser un élément esthétique supplémentaire (une couleur pour le remplissage des formes, par exemple) ou décliner en plusieurs facettes les observations du tableau en fonction de l'une des variables catégorielles. Dans le premier cas, toutes les observations du tableau seront insérées dans le même graphique; dans le deuxième cas, les observations seront distribuées en autant de petits graphiques que la variable catégorielle possède de modalités. Nous allons voir ces deux options.
+Nous sommes maintenant prêts à projeter les données dans un diagramme à barres.
 
 ```{r}
 
 # La première couche constituée des données et des éléments esthétiques sera la même pour les deux types de diagrammes
 p <- ggplot(pretendants_empiles_df, aes(x=chapitre, y=frequence, fill=prenom))
 
-# Option 1: le diagramme utilise les couleurs pour indiquer la distribution des valeurs selon la variable `nom`.
+# Le diagramme utilise les couleurs pour indiquer la distribution des valeurs selon la variable `prénom`.
 p + geom_bar(stat = "identity", position = "stack")+
   xlab("Chapitre")+
   ylab("Fréquence")
 
 
 ```
+
+Chaque type de graphique a ses forces et ses faiblesses. Celui-ci fait bien ressortir le fait que le chapitre V marque un moment clé dans la relation entre les trois prétendants. Le prénom de François y est dominant, mais les deux autres le suivent de près. Les chapitres IV, VII et VIII sont au contraire tournés vers d'autres enjeux.
+
+Le graphique est par ailleurs un peu confus et on pourrait souhaiter séparer les catégories (prénoms) en trois facettes distinctes. On ferait alors comme ceci:
 
 ```{r}
 
@@ -320,7 +356,7 @@ p + geom_bar(stat = "identity") +
 
 ```
 
-À défaut d'être parfaitement lisibles, ces deux premiers graphiques montrent qu'aucune valeur n'est associée aux chapitres IV, VII et VIII. Nous pouvons donc éliminer toutes les lignes associées à ces chapitres dans le tableau:
+Comme aucune valeur n'est associée aux chapitres IV, VII et VIII, nous pouvons éliminer toutes les lignes associées à ces chapitres dans le tableau:
 
 ```{r}
 
@@ -328,6 +364,19 @@ p + geom_bar(stat = "identity") +
 pretendants_empiles_df <- pretendants_empiles_df[!pretendants_empiles_df$frequence == 0, ]
 
 head(pretendants_empiles_df)
+
+```
+
+Cet élagage permet de donner plus d'espace aux autres chapitres.
+
+```{r}
+p <- ggplot(pretendants_empiles_df, aes(x=chapitre, y=frequence, fill=prenom))
+p + geom_bar(stat = "identity") +
+  facet_wrap(~ prenom) +
+  theme(axis.text=element_text(size=6),     #On diminue la taille des titres d'axes pour éviter
+        axis.title=element_text(size=12))+  #les chevauchements
+  xlab("Chapitre")+
+  ylab("Fréquence")
 
 ```
 
@@ -431,6 +480,6 @@ Centre de la science de la biodiversité du Québec, Série d'ateliers R du CSBQ
 
 Hadley Wickham et Garrett Grolemund, *R for Data Science. Import, Tidy, Transform, Visualize, and Model Data*, Sebastopol, O'Reilly.
 
-Hadley Wickham, "A Layered Grammar of Graphics", *Journal of Computational and Graphical Statistics*, vol. 19, no 1, p. 3-28. DOI: 10.1198/jcgs.2009.07098
+Hadley Wickham, "A Layered Grammar of Graphics", *Journal of Computational and Graphical Statistics*, vol. 19, no 1, p. 3-28, 2010. DOI: 10.1198/jcgs.2009.07098
 
 Winston Chang, *R Graphics Cookbook: Practical Recipes for Visualizing Data*, Second Edition, Sebastopol (CA), O'Reilly, 2018.
