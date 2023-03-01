@@ -277,7 +277,7 @@ p3 +
 
 Le diagramme à barres est très efficace pour représenter des jeux de données où les modalités des **variables discrètes** sont en nombre relativement limité. Lorsque ces modalités sont très nombreuses, le graphique peut devenir confus, à moins de mettre à profit un élément esthétique comme des formes ou des couleurs pour représenter une dimension des données.
 
-## Ajout d'un élément esthétique au diagramme à barre
+## Ajout de couleurs au diagramme à barre
 
 Regardons à nouveau la structure du tableau avec les données non agrégées, `mots_chapitres_df`.
 
@@ -382,7 +382,7 @@ p + geom_bar(stat = "identity") +
 
 ## Le diagramme de dispersion
 
-Le diagramme de dispersion, ou nuage de points, transpose chaque donnée d'une distribution en un point. Il est souvent utilisé pour vérifier la corrélation, positive ou négative, entre deux variables (généralement continues) projetées sur l'axe des `x` et des `y`. Prenons le jeu de données `diamonds` proposé par l'extension `ggplot2`. Celui-ci contient une multitude d'informations sur 53 940 diamants. Si on voulait vérifier avec un diagramme de dispersion la corrélation entre les variables `carats` et `price`, deux variables continues, on donnerait à R les instructions suivantes:
+Le diagramme de dispersion, ou nuage de points, transpose chaque valeur d'une distribution en un point. Il est souvent utilisé pour vérifier la corrélation, positive ou négative, entre deux variables (généralement continues) projetées sur l'axe des `x` et des `y`. Prenons le jeu de données `diamonds` proposé par l'extension `ggplot2`. Celui-ci contient une multitude d'informations sur 53 940 diamants. Si on voulait vérifier avec un diagramme de dispersion la corrélation entre les variables `carats` et `price`, deux variables continues, on donnerait à R les instructions suivantes:
 
 ```{r}
 
@@ -391,9 +391,11 @@ ggplot(diamonds, aes(x=carat, y=price))+
 
 ```
 
-Chaque point de ce graphique représente un diamant défini par sa qualité, exprimée en carats, et son prix, exprimé en dollars.
+Chaque point de ce graphique représente un diamant défini par sa qualité, exprimée en carats, et son prix, exprimé en dollars. On voit clairement que la variable dépendante, `price`, est corrélée à la variable indépendante, `carat`.
 
-Reprenons maintenant le jeu de données créé à partir du roman *Maria Chapdelaine*. Nous allons utiliser le diagramme de dispersion pour simplement observer, comme on l'a fait avec le diagramme à barres, les mentions de prénoms des prétendants de Maria. Nous avons trois variables à projeter sur la surface en deux dimensions du graphique: les chapitres, les prénoms et la fréquence de leur mention. Comme nous n'avons que deux axes (`x` et `y`), nous devrons utiliser un troisième élément esthétique pour représenter l'une des trois variables. En `x`, on mettra la variable indépendante, `chapitre`, en y, `frequence`, et on donnera à chaque point du graphique une forme correspondant à la troisième variable, `prenom`. Il n'y a que trois prénoms, donc trois formes distinctes. On utilise, dans les esthétiques, l'argument `shape=` pour indiquer la variable qui doit servir à créer les formes. `ggplot2` créera automatiquement une légende qu'il placera, par défaut, à droite du diagramme.
+### Ajout de formes au diagramme de dispersion
+
+Reprenons maintenant le jeu de données créé à partir du roman *Maria Chapdelaine*. Nous allons utiliser le diagramme de dispersion pour simplement observer, comme on l'a fait avec le diagramme à barres, les mentions de prénoms des prétendants de Maria. Rappelons que nous avons trois variables à projeter sur la surface en deux dimensions du graphique: les noms de chapitres, les prénoms et la fréquence de leurs mentions. Comme nous n'avons que deux axes (`x` et `y`), nous devrons utiliser un troisième élément esthétique pour représenter l'une des trois variables. En `x`, on mettra la variable indépendante, `chapitre`, en y, `frequence`, et on donnera à chaque point du graphique une forme correspondant à la variable catégorielle, `prenom`. Il n'y a que trois prénoms, donc trois formes distinctes. On utilise, dans les esthétiques, l'argument `shape=` pour indiquer la variable qui doit servir à créer les formes. `ggplot2` créera automatiquement une légende qu'il placera, par défaut, à droite du diagramme.
 
 ```{r}
 
@@ -403,7 +405,7 @@ p + geom_point()
 
 ```
 
-Pour accentuer le contraste entre les points, on peut attribuer une couleur unique aux formes. Cela se fait aisément en utilisant l'argument `colour=` (ou `color=`) dans les esthétiques:
+Pour accentuer le contraste entre les points, on peut attribuer une couleur unique aux formes. Cela se fait aisément en utilisant l'argument `colour=` (ou `color=`) dans les esthétiques. On peut donc associer ceux éléments esthétiques à une variable:
 
 ```{r}
 
@@ -427,7 +429,7 @@ p + geom_point(aes(colour = prenom), size = 4) +
 
 ```
 
-Le diagramme gagne en lisibilité, mais il est encore difficile d'en tirer une information pertinente, mis à part que "françois" atteint des sommets en fait de mentions, ce qui traduit l'importance qu'il prend dans les chapitres centraux du roman. Comme ici, il est parfois souhaitable de subdiviser le diagramme en autant de facettes qu'il y a de modalités dans la variable catégorielle d'intérêt. On peut faire une telle chose en utilisant la fonction `facet()` et en lui donnant, comme argument, la variable qui doit déterminer, par le nombre de ses modalités, le nombre de diagrammes à créer. On utilise l'opérateur `~` pour indiquer cette variable déterminante.
+Le diagramme gagne en lisibilité, mais il est encore difficile d'en tirer une information pertinente, mis à part que "françois" atteint des sommets en fait de mentions, ce qui traduit l'importance qu'il prend dans les chapitres centraux du roman. Comme ici, il est parfois souhaitable de subdiviser le diagramme en autant de facettes qu'il y a de modalités dans la variable catégorielle d'intérêt. On peut faire une telle chose en utilisant la fonction `facet_wrap()` et en lui donnant, comme argument, la variable qui doit déterminer, par le nombre de ses modalités, le nombre de diagrammes à créer. On utilise l'opérateur `~` pour indiquer cette variable déterminante.
 
 ```{r}
 
@@ -461,7 +463,7 @@ p + geom_point(aes(colour = prenom), size = 4)+
 
 ```
 
-Trois facettes, trois prétendants. Pour aller plus loin, il faudrait travailler les données en amont, vérifier que les personnages ne sont pas mentionnés par des surnoms ou leur patronyme, se demander si on doit également prendre en compte leur évocation ou ce qu'ils représentent (*l'amour* pour François, *la vie facile* pour Lorenzo, *le devoir et la famille* pour Eutrope). En l'état, le graphique traduit tout de même des faits narratifs: François est celui dont le nom est le plus souvent convoqué dans le roman, ce qui traduit la focalisation dont il fait l'objet. Il apparaît tôt dans le roman, mais disparaît dans les bois et s'efface donc comme possible futur mari. Ne restent plus que Lorenzo et Eutrope. Ce dernier n'est jamais le "gagnant" en fait de mentions, mais il est celui qui reste là jusqu'à la fin et qui aura la main de Maria. Quant au chatoyant Lorenzo, il suscite un temps un grand intérêt, mais son étoile palit à la fin du roman, jusqu'à disparaître.
+Trois facettes, trois prétendants. Pour aller plus loin, il faudrait travailler les données en amont, vérifier que les personnages ne sont pas mentionnés par des surnoms ou leur patronyme, se demander si on doit également prendre en compte leur évocation ou ce qu'ils représentent (*l'amour* pour François, *la vie facile* pour Lorenzo, *le devoir et la famille* pour Eutrope). En l'état, le graphique raconte une histoire qui *colle* aux faits narratifs: François est le prétendant dont le nom est le plus souvent convoqué dans le roman, ce qui traduit la focalisation dont il fait l'objet. Il apparaît tôt dans le roman, mais disparaît dans les bois et s'efface donc comme possible futur mari. Ne restent plus que Lorenzo et Eutrope. Ce dernier n'est jamais le "gagnant" en fait de mentions, mais il est celui qui reste là jusqu'à la fin et qui aura la main de Maria. Quant au chatoyant Lorenzo, il suscite un temps un grand intérêt, mais son étoile palit à la fin du roman, jusqu'à disparaître.
 
 ## Défi
 
