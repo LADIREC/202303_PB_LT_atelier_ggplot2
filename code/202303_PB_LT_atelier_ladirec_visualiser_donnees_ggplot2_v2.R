@@ -300,6 +300,15 @@ p3 +
   geom_text(aes(label=freq_brute), vjust=1.6, color="white") +
   theme_classic()
 
+#' Défi 1: changer la theme
+#' Chercher les options pour les themes
+
+??theme_classic
+
+#' Choisir une theme de la liste dans ggplot2::theme_grey	et changer le theme en adpatant le code ci-dessu
+
+p3 + 
+  geom_text(aes(label=freq_brute), vjust=1.6, color="white") +
 
 #' 
 #' Le diagramme à barres est très efficace pour représenter des jeux de données où les modalités des variables discrètes sont en nombre relativement limité. Lorsque ces modalités sont très nombreuses, le graphique peut devenir confus.
@@ -345,6 +354,10 @@ p + geom_bar(stat = "identity", position = "stack")+
   xlab("Chapitre")+
   ylab("Fréquence")
 
+# Défi 2: Ajoutez une titre avec ggtitle() et une sous-titre avec subtitle = "". Tip: Regardez le code de p3 ci-dessu
+p + geom_bar(stat = "identity", position = "stack")+
+  xlab("Chapitre")+
+  ylab("Fréquence")+
 
 
 #' 
@@ -358,7 +371,6 @@ p + geom_bar(stat = "identity") +
   xlab("Chapitre")+
   ylab("Fréquence")
 
-
 #' 
 #' À défaut d'être parfaitement lisibles, ces deux premiers graphiques montrent qu'aucune valeur n'est associée aux chapitres IV, VII et VIII. Nous pouvons donc éliminer toutes les lignes associées à ces chapitres dans le tableau:
 #' 
@@ -369,6 +381,10 @@ pretendants_empiles_df <- pretendants_empiles_df[!pretendants_empiles_df$frequen
 
 head(pretendants_empiles_df)
 
+# Défi 3: Utilisez pretendants_empiles_df et creez une stacked barplot comme ci-dessu
+p1 <- ggplot(pretendants_empiles_df, aes(x=chapitre, y=frequence, fill=prenom))
+
+p1 + 
 
 #' 
 #' ## Le diagramme de dispersion
@@ -384,11 +400,11 @@ ggplot(diamonds, aes(x=carat, y=price))+
 #' 
 #' Chaque point de ce graphique représente un diamant défini par sa qualité, exprimée en carats, et son prix, exprimé en dollars.
 #' 
-#' Reprenons maintenant le jeu de données créé à partir du roman *Maria Chapdelaine*. Nous allons utiliser le diagramme de dispersion pour simplement observer, comme on l'a fait avec le diagramme à barres, les mentions de prénoms des prétendants de Maria. Nous avons trois variables à projeter sur la surface en deux dimensions du graphique: les chapitres, les prénoms et la fréquence de leur mention. Comme nous n'avons que deux axes (`x` et `y`), nous devrons utiliser un troisième élément esthétique pour représenter l'une des trois variables. En `x`, on mettra la variable indépendante, `chapitre`, en y, `frequence`, et on donnera à chaque point du graphique une forme correspondant à la troisième variable, `prenom`. Il n'y a que trois prénoms, donc trois formes distinctes. On utilise, dans les esthétiques, l'argument `shape=` pour indiquer la variable qui doit servir à créer les formes. `ggplot2` créera automatiquement une légende qu'il placera, par défaut, à droite du diagramme.
+#' Défi 4: Reprenons maintenant le jeu de données créé à partir du roman *Maria Chapdelaine*. Nous allons utiliser le diagramme de dispersion pour simplement observer, comme on l'a fait avec le diagramme à barres, les mentions de prénoms des prétendants de Maria. Nous avons trois variables à projeter sur la surface en deux dimensions du graphique: les chapitres, les prénoms et la fréquence de leur mention. Comme nous n'avons que deux axes (`x` et `y`), nous devrons utiliser un troisième élément esthétique pour représenter l'une des trois variables. En `x`, on mettra la variable indépendante, `chapitre`, en y, `frequence`, et on donnera à chaque point du graphique une forme correspondant à la troisième variable, `prenom`. Il n'y a que trois prénoms, donc trois formes distinctes. On utilise, dans les esthétiques, l'argument `shape=` pour indiquer la variable qui doit servir à créer les formes. `ggplot2` créera automatiquement une légende qu'il placera, par défaut, à droite du diagramme.
 #' 
 ## -------------------------------------------------------------------------------
 
-p <- ggplot(pretendants_empiles_df, aes(x=chapitre, y=frequence, shape = prenom))
+p <- ggplot()
 
 p + geom_point()
 
@@ -415,7 +431,7 @@ p + geom_point(aes(colour = prenom), size = 4) +
   xlab("Chapitre") +
   ylab("Fréquence relative")
 
-
+# Défi 5: changez les sizes et la coleur des points. Tip: Vous pouvez copier-coller et adapter le code ci-dessu.
 
 #' 
 #' Le diagramme gagne en lisibilité, mais il est encore difficile d'en tirer une information pertinente, mis à part que "françois" atteint des sommets en fait de mentions, ce qui traduit l'importance qu'il prend dans les chapitres centraux du roman. Comme ici, il est parfois souhaitable de subdiviser le diagramme en autant de facettes qu'il y a de modalités dans la variable catégorielle d'intérêt. On peut faire une telle chose en utilisant la fonction `facet()` et en lui donnant, comme argument, la variable qui doit déterminer, par le nombre de ses modalités, le nombre de diagrammes à créer. On utilise l'opérateur `~` pour indiquer cette variable déterminante.
@@ -433,6 +449,7 @@ p + geom_point(aes(colour = prenom), size = 4)+
   xlab("Chapitre")+
   ylab("Fréquence relative")
 
+# Défi 6: On peut adapter la grosseur des points selon la frequence. Utilisez le code ci-dessu et changez la grosseur (size=) du geom_point des prenoms a pretendants_empiles_df$frequence et la grosseurs de geom_point(colour = "white") a pretendants_empiles_df$frequence/5
 
 #' 
 #' De mieux en mieux, non? On pourrait ajouter une autre couche géométrique au graphique, soit une ligne qui relie chacun des points de chaque graphique. Cette ligne sera noire si on ne définit aucune couleur, ou prendra la couleur des modalités de nom si on le précise dans ses éléments esthétiques:
