@@ -27,9 +27,9 @@ library(stringr)
 
 Une image vaut mille mots, dit la sagesse populaire. En science des données, les graphiques sont les images qu'on met à contribution pour faire voir les points saillants de jeux de données ou pour montrer des corrélations entre certaines de leurs dimensions.
 
-On peut admirer ci-dessous le graphiques produit en 1869 par l'ingénieur Charles Joseph Mignard qui illustre les pertes colossales subies par la Grande Armée (450 000 hommes) de Napoléon au cours de la Campagne de Russie. L'épaisseur du trait indique la quantité d'hommes; l'échelle, la distance parcourue; la couleur, la direction de la marche; la partie du bas, les variations de température. Y sont ajoutés les noms de villes traversées par l'armée française. Bien que fondé sur de solides statistiques, ce graphique donne à voir un phénomène qui ne requiert aucune connaissance des statistiques. En quelques traits, il intègre en un système cohérent une multitude de données de divers types et il raconte toute une histoire. C'est un modèle de *data storytelling*.
+On peut admirer ci-dessous le graphiques produit en 1869 par l'ingénieur Charles Joseph Mignard qui illustre les pertes colossales subies par la Grande Armée (450 000 hommes) de Napoléon au cours de la Campagne de Russie (1812). L'épaisseur du trait indique la quantité d'hommes; l'échelle, la distance parcourue; la couleur, la direction de la marche; la partie du bas, les variations de température. Y sont ajoutés les noms de villes traversées par l'armée française. Bien que fondé sur de solides statistiques, ce graphique donne à voir un phénomène qui ne requiert aucune connaissance des statistiques. En quelques traits, il intègre en un système cohérent une multitude de données de divers types et il raconte toute une histoire. C'est un modèle de *data storytelling*.
 
-[![Charles Joseph Minard, "Carte figurative des pertes successives en hommes de l'armée française dans la campagne de Russie 1812-1813", 1869](images/minard_campagne_russie.png){fig-align="center"}](https://fr.wikipedia.org/wiki/Charles_Joseph_Minard)
+[![Charles Joseph Minard, "Carte figurative des pertes successives en hommes de l\'armée française dans la campagne de Russie 1812-1813", 1869](images/minard_campagne_russie.png){fig-align="center"}](https://fr.wikipedia.org/wiki/Charles_Joseph_Minard)
 
 # Programme de l'atelier
 
@@ -39,9 +39,9 @@ Comment fabrique-t-on un graphique à partir de données textuelles? Cette quest
 
 -   Les **vecteurs** et les **tableaux de données** dans R;
 
--   Variable **discrète** et variable **continue;**
+-   Les variables **discrètes** et **continues**;
 
--   **Grammaire** des graphiques.
+-   La **grammaire** des graphiques.
 
 # Types et structures de données
 
@@ -82,7 +82,7 @@ tribble(
   "NA",
   "sans objet",
   "NA",
-  "empty",
+  "NULL",
   "valeur nulle",
   "NULL"
 )
@@ -92,7 +92,9 @@ Le graphique de Minard présenté en introduction contient à la fois des chaine
 
 ## Les vecteurs et les tableaux de données dans R
 
-Pour manipuler les données, il faut les emmagasiner dans des variables, c'est-à-dire des conteneurs dont le contenu est appelé à changer au fil des opérations (d'où le nom "variable" attribué aux conteneurs). Les structures de données varient selon le nombre de dimensions qu'elles comportent (1 à *n* dimensions) et selon que leurs données sont homogènes (1 seul type) ou hétérogènes (plusieurs types). Le vecteur et la matrice, par exemple, sont des structures dites "atomiques", c'est-à-dire qu'on ne peut y mettre qu'un seul type de données. Le vecteur possède une seule dimension tandis que la matrice en possède deux. Le tableau de données, très utilisé en science des données, est très polyvalent: il accepte des données de plusieurs types (un seul type par colonne, cependant) et possède deux dimensions.
+Pour manipuler les données, il faut les emmagasiner dans des variables, c'est-à-dire des conteneurs dont le contenu est appelé à changer au fil des opérations (d'où le nom "variable" attribué aux conteneurs). Les structures de données varient selon le **nombre de dimensions** qu'elles comportent (1, 2 ou plusieurs dimensions) et selon que leurs données sont **homogènes** (1 seul type) ou **hétérogènes** (plusieurs types).
+
+Le **vecteur** et la **matrice**, par exemple, sont des structures dites "atomiques", c'est-à-dire qu'on ne peut y mettre qu'un seul type de données. Le vecteur possède une seule dimension tandis que la matrice en possède deux. Le **tableau de données**, très utilisé en science des données, est très polyvalent: il accepte des données de plusieurs types (un seul type par colonne, cependant) et possède deux dimensions.
 
 [![Structures de données dans R](images/fig1.png){fig-align="center"}](https://bookdown.org/introrbook/intro2r/data-types-and-structures.html)
 
@@ -126,7 +128,7 @@ tribble(
 )
 ```
 
-## Données discrètes et données continues
+## Variables discrètes et variables continues
 
 On appelle variables discrètes celles dont les valeurs correspondent et ne peuvent correspondre qu'à des nombres **entiers** et **finis**. La quantité de soldats formant l'armée ne peut prendre aucune valeur entre 0 et 1 ou entre 10 000 et 10 001. Ces données sont dites discrètes. À l'opposé, la distance ou le temps fournissent des variables continues, dont le défilement est continu et qu'on peut toujours découper plus finement.
 
@@ -150,7 +152,20 @@ Dans la grammaire des graphiques, une couche est composée des éléments suivan
 
 Le graphique est le résultat de la superposition de ces couches. Certaines sont facultatives ou sont pourvues de valeurs par défaut, d'autres sont nécessaires et doivent être précisées par l'utilisateur:
 
-[![Capture de l'antisèche ggplot2, RStudio](images/ggplot_min.jpg){fig-align="center"}](https://www.rstudio.com/resources/cheatsheets/)
+[![Capture de l\'antisèche ggplot2, RStudio](images/ggplot_min.jpg){fig-align="center"}](https://www.rstudio.com/resources/cheatsheets/)
+
+```{r}
+# Exemple proposé dans l'antisèche ggplot2
+
+# Jeu de données mpg
+mpg
+
+ggplot(data = mpg, aes(x = cty, y = hwy)) +
+  geom_jitter() +
+  geom_smooth()
+
+
+```
 
 Le tableau ci-dessous fournit quelques précisions supplémentaires. Il ne faut pas essayer de mémoriser ces informations. Il est plus intéressant et productif de procéder par essai et erreur, puis de se référer au tableau et à l'abondante documentation sur la grammaire des graphiques pour approfondir la compréhension du processus.
 
@@ -202,7 +217,7 @@ On notera également que plusieurs extensions prennent appui sur `ggplot2` pour 
 
 ## Le diagramme à barres
 
-Revenons aux bases et voyons comment se combinent concrètement les éléments d'un graphique. Nous allons utiliser un jeu de données construit à partir du roman *Maria Chapdelaine*, de Louis Hémon, un roman français devenu un classique de la littérature québécoise (eh oui!). Dans le bloc d'instructions ci-dessous, le texte de Louis Hémon est importé depuis le [Projet Gutenberg](https://www.gutenberg.org/), puis traité pour forger une table comprenant, pour chacun des chapitres, le nombre de mots.
+Revenons aux bases et voyons comment se combinent concrètement les éléments d'un graphique. Nous allons utiliser un jeu de données construit à partir du **roman *Maria Chapdelaine***, de Louis Hémon, un roman français devenu un classique de la littérature québécoise (eh oui!). Dans le bloc d'instructions ci-dessous, le texte de Louis Hémon est importé depuis le [Projet Gutenberg](https://www.gutenberg.org/), puis traité pour forger une table comprenant, pour chacun des chapitres, le nombre de mots. N'importe quel autre texte du Projet Gutemberg pourrait faire l'objet d'un traitement similaire.
 
 ```{r}
 #| include: false
