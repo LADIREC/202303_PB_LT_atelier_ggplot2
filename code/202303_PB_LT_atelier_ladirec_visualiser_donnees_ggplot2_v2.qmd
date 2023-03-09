@@ -29,7 +29,7 @@ Une image vaut mille mots, dit la sagesse populaire. En science des données, le
 
 On peut admirer ci-dessous le graphiques produit en 1869 par l'ingénieur Charles Joseph Mignard qui illustre les pertes colossales subies par la Grande Armée (450 000 hommes) de Napoléon au cours de la Campagne de Russie (1812). L'épaisseur du trait indique la quantité d'hommes; l'échelle, la distance parcourue; la couleur, la direction de la marche; la partie du bas, les variations de température. Y sont ajoutés les noms de villes traversées par l'armée française. Bien que fondé sur de solides statistiques, ce graphique donne à voir un phénomène qui ne requiert aucune connaissance des statistiques. En quelques traits, il intègre en un système cohérent une multitude de données de divers types et il raconte toute une histoire. C'est un modèle de *data storytelling*.
 
-[![Charles Joseph Minard, "Carte figurative des pertes successives en hommes de l\'armée française dans la campagne de Russie 1812-1813", 1869](images/minard_campagne_russie.png){fig-align="center"}](https://fr.wikipedia.org/wiki/Charles_Joseph_Minard)
+[![Charles Joseph Minard, "Carte figurative des pertes successives en hommes de l'armée française dans la campagne de Russie 1812-1813", 1869](images/minard_campagne_russie.png){fig-align="center"}](https://fr.wikipedia.org/wiki/Charles_Joseph_Minard)
 
 # Programme de l'atelier
 
@@ -152,7 +152,7 @@ Dans la grammaire des graphiques, une couche est composée des éléments suivan
 
 Le graphique est le résultat de la superposition de ces couches. Certaines sont facultatives ou sont pourvues de valeurs par défaut, d'autres sont nécessaires et doivent être précisées par l'utilisateur:
 
-[![Capture de l\'antisèche ggplot2, RStudio](images/ggplot_min.jpg){fig-align="center"}](https://www.rstudio.com/resources/cheatsheets/)
+[![Capture de l'antisèche ggplot2, RStudio](images/ggplot_min.jpg){fig-align="center"}](https://www.rstudio.com/resources/cheatsheets/)
 
 ```{r}
 # Exemple proposé dans l'antisèche ggplot2
@@ -388,7 +388,7 @@ head(mots_chapitres_df, n = 3)
 
 ```
 
-Supposons que nous souhaitions observer les occurrences des prénoms des prétendants dans tous les chapitres du roman Maria Chapdelaine. Le tableau de données fournit ces informations: chaque ligne correspond à un chapitre et on a, pour chacun des prénoms, les valeurs correspondant aux occurrences. Le problème est qu'il n'y a que deux axes dans le graphique à barres (x et y) et que nous avons trois informations: chapitre, prénom, occurrences. Les occurrences sont des valeurs numériques discrètes qui peuvent être projetés sur l'axe y. Normalement, pour observer une progression naturelle en fonction des chapitres, on voudrait placer ceux-ci sur l'axe des x. Pour intégrer au graphique l'information catégorielle "prénom", on peut recourir à un élément esthétique comme des couleurs.
+Supposons que nous souhaitions observer les occurrences des prénoms des prétendants dans tous les chapitres du roman Maria Chapdelaine. Le tableau de données fournit ces informations: chaque ligne correspond à un chapitre et on a, pour chacun des prénoms, les valeurs correspondant aux occurrences. Le problème est qu'il y a **seulement deux axes** dans le graphique à barres (x et y) et que nous avons **trois informations**: **chapitre**, **prénom**, **occurrences**. Les occurrences sont des valeurs numériques discrètes qui peuvent être projetés sur l'axe y. Normalement, pour observer une progression naturelle en fonction des chapitres, on voudrait placer ceux-ci sur l'axe des x. Pour intégrer au graphique l'information catégorielle "prénom", on peut recourir à un élément esthétique comme des couleurs.
 
 Dans sa forme actuelle, cependant, le tableau ne convient pas. Les prénoms correspondent à trois colonnes distinctes. Voyez:
 
@@ -417,7 +417,7 @@ pretendants_empiles_df
 
 ```
 
-Il reste une petite opération à faire avant de créer le graphique. Les valeurs de la variable "chapitre" sont de simples chaînes de caractères. Si nous les projetons telles quelles dans un graphique, R ordonnera ces chaînes selon l'ordre alphabétique de la première lettre et il placera donc côte-à-côte les chapitres I, II, III, IV et IX. Pour imposer un ordre particulier à ces titres de chapitre, il faut les emmagasiner dans un vecteur de type catégoriel. Nous faisons cela avec la fonction `factor()`, qui comporte un argument, `level=`, permettant de déterminer l'ordre des catégories.
+Il reste une petite opération à faire avant de créer le graphique. Les valeurs de la variable "chapitre" sont de simples chaînes de caractères. Si nous les projetons telles quelles dans un graphique, R ordonnera ces chaînes selon l'ordre alphabétique de la première lettre et il placera donc côte-à-côte les chapitres I, II, III, IV et IX. Pour imposer un ordre particulier à ces titres de chapitres, il faut les emmagasiner dans un vecteur de type catégoriel. Nous faisons cela avec la fonction `factor()`, qui comporte un argument, `level=`, permettant de déterminer l'ordre des catégories.
 
 ```{r}
 
