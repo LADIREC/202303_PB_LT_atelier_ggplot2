@@ -9,13 +9,15 @@ format:
     fontsize: 1.1em
     linestretch: 1.7
 editor: visual
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r}
 #| include: false
 options(repos=c(CRAN="https://mirror.csclub.uwaterloo.ca/CRAN/"))
 if(!"ggplot2" %in% rownames(installed.packages())) {install.packages("ggplot2")}
-if(!"gugenbergr" %in% rownames(installed.packages())) {install.packages("gutenbergr")}
+if(!"gutenbergr" %in% rownames(installed.packages())) {install.packages("gutenbergr")}
 if(!"stringr" %in% rownames(installed.packages())) {install.packages("stringr")}
 
 library(ggplot2)
@@ -29,7 +31,7 @@ Une image vaut mille mots, dit la sagesse populaire. En science des données, le
 
 On peut admirer ci-dessous le graphiques produit en 1869 par l'ingénieur Charles Joseph Mignard qui illustre les pertes colossales subies par la Grande Armée (450 000 hommes) de Napoléon au cours de la Campagne de Russie (1812). L'épaisseur du trait indique la quantité d'hommes; l'échelle, la distance parcourue; la couleur, la direction de la marche; la partie du bas, les variations de température. Y sont ajoutés les noms de villes traversées par l'armée française. Bien que fondé sur de solides statistiques, ce graphique donne à voir un phénomène qui ne requiert aucune connaissance des statistiques. En quelques traits, il intègre en un système cohérent une multitude de données de divers types et il raconte toute une histoire. C'est un modèle de *data storytelling*.
 
-[![Charles Joseph Minard, "Carte figurative des pertes successives en hommes de l'armée française dans la campagne de Russie 1812-1813", 1869](images/minard_campagne_russie.png){fig-align="center"}](https://fr.wikipedia.org/wiki/Charles_Joseph_Minard)
+[![Charles Joseph Minard, "Carte figurative des pertes successives en hommes de l\'armée française dans la campagne de Russie 1812-1813", 1869](images/minard_campagne_russie.png){fig-align="center"}](https://fr.wikipedia.org/wiki/Charles_Joseph_Minard)
 
 # Programme de l'atelier
 
@@ -152,7 +154,7 @@ Dans la grammaire des graphiques, une couche est composée des éléments suivan
 
 Le graphique est le résultat de la superposition de ces couches. Certaines sont facultatives ou sont pourvues de valeurs par défaut, d'autres sont nécessaires et doivent être précisées par l'utilisateur:
 
-[![Capture de l'antisèche ggplot2, RStudio](images/ggplot_min.jpg){fig-align="center"}](https://www.rstudio.com/resources/cheatsheets/)
+[![Capture de l\'antisèche ggplot2, RStudio](images/ggplot_min.jpg){fig-align="center"}](https://www.rstudio.com/resources/cheatsheets/)
 
 ```{r}
 # Exemple proposé dans l'antisèche ggplot2
@@ -218,6 +220,10 @@ On notera également que plusieurs extensions prennent appui sur `ggplot2` pour 
 ## Le diagramme à barres
 
 Revenons aux bases et voyons comment se combinent concrètement les éléments d'un graphique. Nous allons utiliser un jeu de données construit à partir du **roman *Maria Chapdelaine***, de Louis Hémon, un roman français devenu un classique de la littérature québécoise (eh oui!). Dans le bloc d'instructions ci-dessous, le texte de Louis Hémon est importé depuis le [Projet Gutenberg](https://www.gutenberg.org/), puis traité pour forger une table comprenant, pour chacun des chapitres, le nombre de mots. N'importe quel autre texte du Projet Gutemberg pourrait faire l'objet d'un traitement similaire.
+
+> **Note**: si l'importation du roman avec la fonction `gutenberg_download(…)` pose problème, remplacez la première ligne d'instruction du bloc par l'instruction suivante:
+>
+> `maria <- readRDS("donnees/maria.RDS")`
 
 ```{r}
 #| include: false
